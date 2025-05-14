@@ -4,8 +4,8 @@ namespace HexKit3D
 {
     public class HexTile : MonoBehaviour
     {
-        [HideInInspector] public HexTilemap owner;
-        [HideInInspector] public Cubic position;
+        public HexTilemap owner;
+        public Cubic position;
         public float height => transform.localPosition.y;
 
         //Pathfinding
@@ -53,6 +53,14 @@ namespace HexKit3D
         public static int Distance(Cubic a, Cubic b)
         {
             return (Mathf.Abs(a.q - b.q) + Mathf.Abs(a.r - b.r) + Mathf.Abs(a.s - b.s)) / 2;
+        }
+        public override bool Equals(object obj)
+        {
+            return obj is Cubic cubic && cubic == this;
+        }
+        public override int GetHashCode()
+        {
+            return (q, r, s).GetHashCode();
         }
     }
 }

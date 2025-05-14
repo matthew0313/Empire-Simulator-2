@@ -5,24 +5,16 @@ namespace HexKit3D
 {
     public class HexTilemap : MonoBehaviour
     {
-        [Header("Grid Settings")]
-        [SerializeField] float m_tileSize = 1.0f;
+        [Header("Grid")]
         [SerializeField] List<HexTile> m_placedTiles = new();
-        public float tileSize => m_tileSize;
         public List<HexTile> placedTiles => m_placedTiles;
 
-        [Header("Pathfinding")]
-        [SerializeField] float maxHeightDifference = 1.1f;
+        [Header("Settings")]
+        [SerializeField] HexTilemapSettings settings;
+        public float tileSize => settings.tileSize;
+        public float maxHeightDifference => settings.maxHeightDifference;
 
         public readonly Dictionary<Cubic, HexTile> tiles = new();
-
-        private void OnValidate()
-        {
-            foreach (var i in placedTiles)
-            {
-                i.transform.position = Cubic.CubicToPos(i.position, i.transform.position.y, tileSize);
-            }
-        }
         private void Awake()
         {
             foreach (var i in placedTiles)
@@ -34,15 +26,23 @@ namespace HexKit3D
                 tiles.Add(i.position, i);
             }
         }
+        private void OnDrawGizmos()
+        {
+            Gizmos.DrawLine(new Vector3(transform.position.x, 10000.0f, transform.position.z), new Vector3(transform.position.x, -10000.0f, transform.position.z));
+        }
         readonly List<HexTile> searchQueue = new(), searched = new();
         Cubic[] dir = new Cubic[6]
         {
-        new(-1, 1, 0), new(-1, 0, 1), new(0, 1, -1), new(0, -1, 1), new(-1, 0, 1), new(-1, 1, 0)
+            new(-1, 1, 0), new(-1, 0, 1), new(0, 1, -1), new(0, -1, 1), new(-1, 0, 1), new(-1, 1, 0)
         };
+        public bool TryGetTile(Cubic cubic, out HexTile tile)
+        {
+            return tiles.TryGetValue(cubic, out tile);
+        }
         public HexTilemapPath FindPath(Cubic startPosition, Cubic endPosition)
         {
             searchQueue.Clear(); searched.Clear();
-            if (!tiles.TryGetValue(startPosition, out HexTile start)) return null;
+            if (!TryGetTile(startPosition, out HexTile start)) return null;
             start.g = 0;
             start.h = Cubic.Distance(start.position, endPosition);
             searchQueue.Add(start);
@@ -64,7 +64,7 @@ namespace HexKit3D
                 searchQueue.RemoveAt(0);
                 for (int i = 0; i < 6; i++)
                 {
-                    if (tiles.TryGetValue(current.position + dir[i], out HexTile neighbor))
+                    if (TryGetTile(current.position + dir[i], out HexTile neighbor))
                     {
                         if (IsMovable(current, neighbor))
                         {
@@ -102,3 +102,24 @@ namespace HexKit3D
         public readonly List<HexTile> route = new();
     }
 }
+#if UNITY_EDITOR
+namespace HexKit3D.Editor
+{
+    using UnityEditor;
+    [CustomEditor(typeof(HexTilemap))]
+    public class HexTilemap_Editor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            if(GUILayout.Button("Fix Tile Position"))
+            {
+                foreach (var i in ((HexTilemap)target).placedTiles)
+                {
+                    i.transform.position = Cubic.CubicToPos(i.position, i.transform.position.y, ((HexTilemap)target).tileSize);
+                }
+            }
+        }
+    }
+}
+#endif

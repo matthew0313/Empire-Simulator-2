@@ -14,6 +14,9 @@ namespace HexKit3D.Editor
         HexPlacerMode mode;
         HexPlacerReplaceMode replaceMode;
 
+        //controls
+        float heightOffsetIncrement = 0.5f;
+
         //visuals
         float minTileHeight = 0.0f, maxTileHeight = 10.0f;
         Color minTileColor = Color.red, maxTileColor = Color.blue;
@@ -35,6 +38,11 @@ namespace HexKit3D.Editor
             {
                 replaceMode = (HexPlacerReplaceMode)EditorGUILayout.EnumPopup("Replace Mode", replaceMode);
             }
+
+            EditorGUILayout.Space(10);
+            EditorGUILayout.LabelField("Controls");
+            heightOffsetIncrement = EditorGUILayout.FloatField("Height Offset Increment", heightOffsetIncrement);
+
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Visuals - Tile Height");
             minTileHeight = EditorGUILayout.FloatField("Min Tile View Height", minTileHeight);
@@ -47,12 +55,10 @@ namespace HexKit3D.Editor
         }
         private void OnEnable()
         {
-            Debug.Log("Enable");
             SceneView.duringSceneGui += DuringSceneGui;
         }
         private void OnDisable()
         {
-            Debug.Log("Disable");
             SceneView.duringSceneGui -= DuringSceneGui;
             placementPreview.gameObject.SetActive(false);
             mode = HexPlacerMode.None;
@@ -97,6 +103,18 @@ namespace HexKit3D.Editor
             {
                 case HexPlacerMode.Placing:
                     if (Event.current.type == EventType.MouseDown && Event.current.button == 0) Event.current.Use();
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.E)
+                    {
+                        Event.current.Use();
+                        heightOffset += heightOffsetIncrement;
+                        Repaint();
+                    }
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Q)
+                    {
+                        Event.current.Use();
+                        heightOffset -= heightOffsetIncrement;
+                        Repaint();
+                    }
                     if (target != null && placingPrefab != null)
                     {
                         Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
@@ -108,6 +126,7 @@ namespace HexKit3D.Editor
                         {
                             previewPrefab = placingPrefab;
                             preview = PrefabUtility.InstantiatePrefab(previewPrefab, target.transform) as HexTile;
+                            preview.gameObject.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInEditor | HideFlags.HideInInspector;
                         }
                         else if (previewPrefab != placingPrefab)
                         {
@@ -129,6 +148,9 @@ namespace HexKit3D.Editor
                             {
                                 preview.position = hex;
                                 preview.owner = target;
+                                preview.gameObject.hideFlags = HideFlags.None;
+                                EditorUtility.SetDirty(preview);
+                                PrefabUtility.RecordPrefabInstancePropertyModifications(preview);
                                 target.placedTiles.Add(preview);
                                 preview = null;
                             }
@@ -138,6 +160,9 @@ namespace HexKit3D.Editor
                                 DestroyImmediate(found.gameObject);
                                 preview.position = hex;
                                 preview.owner = target;
+                                preview.gameObject.hideFlags = HideFlags.None;
+                                EditorUtility.SetDirty(preview);
+                                PrefabUtility.RecordPrefabInstancePropertyModifications(preview);
                                 target.placedTiles.Add(preview);
                                 preview = null;
                             }
@@ -150,6 +175,18 @@ namespace HexKit3D.Editor
                     break;
                 case HexPlacerMode.Deleting:
                     if (Event.current.type == EventType.MouseDown && Event.current.button == 0) Event.current.Use();
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.E)
+                    {
+                        Event.current.Use();
+                        heightOffset += heightOffsetIncrement;
+                        Repaint();
+                    }
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Q)
+                    {
+                        Event.current.Use();
+                        heightOffset -= heightOffsetIncrement;
+                        Repaint();
+                    }
                     if (target != null)
                     {
                         Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
