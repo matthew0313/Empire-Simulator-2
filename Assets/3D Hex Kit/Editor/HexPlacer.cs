@@ -51,7 +51,6 @@ namespace HexKit3D.Editor
             maxTileColor = EditorGUILayout.ColorField("Max Tile View Color", maxTileColor);
             if (GUILayout.Button("Create Height View")) CreateHeightView();
             if (GUILayout.Button("Clear Height View")) ClearHeightView();
-            Debug.Log(mouseHeld);
         }
         private void OnEnable()
         {

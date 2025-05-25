@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HexKit3D
@@ -9,10 +10,27 @@ namespace HexKit3D
         public float height => transform.localPosition.y;
 
         //Pathfinding
-        [HideInInspector] public int h, g;
-        public int f => h + g;
+        [HideInInspector] public float h, g;
+        public float f => h + g;
         [HideInInspector] public HexTile prev;
-        public virtual bool IsMovable(HexTile other) => true;
+
+        Cubic[] dir = new Cubic[6]
+        {
+            new(1, -1, 0), new(-1, 1, 0), new(0, 1, -1), new(0, -1, 1), new(1, 0, -1), new(-1, 0, 1)
+        };
+        public virtual bool isWalkable => true;
+        public virtual IEnumerable<HexTile> GetNeighbors()
+        {
+            if (owner == null) yield break;
+            for(int i = 0; i < 6; i++)
+            {
+                if (owner.TryGetTile(position + dir[i], out HexTile tile) && Mathf.Abs(tile.height - height) <= owner.maxHeightDifference) yield return tile;
+            }
+        }
+        public virtual float GetDistance(HexTile other)
+        {
+            return Cubic.Distance(position, other.position);
+        }
     }
     [System.Serializable]
     public struct Cubic
@@ -62,5 +80,31 @@ namespace HexKit3D
         {
             return (q, r, s).GetHashCode();
         }
+        public override string ToString()
+        {
+            return $"({q}, {r}, {s})";
+        }
+        public static int Compare(Cubic a, Cubic b)
+        {
+            if (a.q > b.q) return 1;
+            else if (a.q < b.q) return -1;
+            else
+            {
+                if (a.r > b.r) return 1;
+                else if (a.r < b.r) return -1;
+                else return 0;
+            }
+        }
     }
 }
+#if UNITY_EDITOR
+namespace HexKit3D.Editor
+{
+    using UnityEditor;
+    [CustomEditor(typeof(HexTile))]
+    public class HexTile_Editor : Editor
+    {
+        
+    }
+}
+#endif

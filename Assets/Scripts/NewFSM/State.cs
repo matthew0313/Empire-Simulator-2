@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class State<T, ValT> where ValT : FSMVals
+public abstract class State<T>
 {
     protected readonly T origin;
-    public readonly Layer<T, ValT> parentLayer;
-    protected virtual TopLayer<T, ValT> root => parentLayer.root;
-    protected virtual ValT values => root.values;
-    public State(T origin, Layer<T, ValT> parent)
+    public readonly Layer<T> parentLayer;
+    protected virtual TopLayer<T> root => parentLayer.root;
+    protected virtual FSMVals values => parentLayer.values;
+    public State(T origin, Layer<T> parent)
     {
         this.origin = origin;
         this.parentLayer = parent;

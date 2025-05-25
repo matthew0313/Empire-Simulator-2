@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public abstract class TopLayer<T, ValT> : Layer<T, ValT> where ValT : FSMVals
+public abstract class TopLayer<T> : Layer<T>
 {
     public Action onFSMChange;
-    protected override TopLayer<T, ValT> root => this;
-    readonly ValT m_values;
-    protected override ValT values => m_values;
-    public TopLayer(T origin, ValT values) : base(origin, null)
+    protected override TopLayer<T> root => this;
+    readonly FSMVals m_values;
+    protected override FSMVals values => m_values;
+    public TopLayer(T origin, FSMVals values) : base(origin, null)
     {
         m_values = values;
     }

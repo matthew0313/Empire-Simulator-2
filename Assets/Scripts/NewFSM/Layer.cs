@@ -3,22 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Layer<T, ValT> : State<T, ValT> where ValT : FSMVals
+public abstract class Layer<T> : State<T>
 {
-    protected Dictionary<string, State<T, ValT>> states = new();
-    protected Dictionary<State<T, ValT>, string> stateNames = new();
-    protected State<T, ValT> currentState = null;
-    protected State<T, ValT> defaultState = null;
-    public Layer(T origin, Layer<T, ValT> parent) : base(origin, parent)
+    protected readonly Dictionary<string, State<T>> states = new();
+    protected readonly Dictionary<State<T>, string> stateNames = new();
+    protected readonly State<T> defaultState = null;
+    protected State<T> currentState = null;
+    public Layer(T origin, Layer<T> parent) : base(origin, parent)
     {
 
     }
-    protected void AddState(string name, State<T, ValT> state)
+    protected void AddState(string name, State<T> state)
     {
         states[name] = state;
         stateNames[state] = name;
     }
-    public string GetStateName(State<T, ValT> state)
+    public string GetStateName(State<T> state)
     {
         if (!stateNames.ContainsKey(state))
         {

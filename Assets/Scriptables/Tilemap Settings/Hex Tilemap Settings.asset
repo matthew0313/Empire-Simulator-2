@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Hex Tilemap Settings
   m_EditorClassIdentifier: 
   m_tileSize: 1
-  m_maxHeightDifference: 1.1
+  m_maxHeightDifference: 0.6
