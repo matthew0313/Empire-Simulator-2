@@ -7,7 +7,7 @@ public abstract class Layer<T> : State<T>
 {
     protected readonly Dictionary<string, State<T>> states = new();
     protected readonly Dictionary<State<T>, string> stateNames = new();
-    protected readonly State<T> defaultState = null;
+    protected State<T> defaultState = null;
     protected State<T> currentState = null;
     public Layer(T origin, Layer<T> parent) : base(origin, parent)
     {

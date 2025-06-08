@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1576eae4ba094344b613529f92124ac, type: 3}
+  m_Name: Bread
+  m_EditorClassIdentifier: 
+  m_itemName:
+    en: Bread
+    kr: "\uBE75"
+  m_itemDesc:
+    en: It's a bread.
+    kr: "\uBE75\uC785\uB2C8\uB2E4."
+  m_itemIcon: {fileID: 21300000, guid: 7154b1afe9bbc5b42ae08e1c9a241839, type: 3}
+  energyRestored: 100
+  selectionPriority: 0

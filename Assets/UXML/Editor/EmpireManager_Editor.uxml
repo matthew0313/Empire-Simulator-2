@@ -1,0 +1,23 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/UXML/Editor/Style.uss?fileID=7433441132597879392&amp;guid=2400dd44113c6ae4aa90870c795b02d2&amp;type=3#Style" />
+    <ui:VisualElement class="back" style="flex-grow: 1; margin-left: 10px; padding-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; background-color: rgba(0, 0, 0, 0.39); margin-top: 10px; margin-right: 10px; margin-bottom: 10px;">
+        <ui:Label text="EmpireManager" class="title" />
+        <ui:VisualElement class="back" style="flex-grow: 1;">
+            <ui:Label text="Inventory" class="smallTitle" />
+            <ui:VisualElement class="back" style="flex-grow: 1;">
+                <ui:Label text="Contents" class="smallTitle" />
+                <ui:VisualElement name="InventoryContents" class="back" style="flex-grow: 1;" />
+            </ui:VisualElement>
+            <ui:VisualElement class="back" style="flex-grow: 1;">
+                <ui:Label text="Starting Items" class="smallTitle" />
+                <uie:PropertyField binding-path="startingItems" />
+            </ui:VisualElement>
+            <ui:VisualElement class="back" style="flex-grow: 1;">
+                <ui:Label text="Add Item" class="smallTitle" />
+                <uie:PropertyField binding-path="addingItem" />
+                <uie:PropertyField binding-path="addingCount" />
+                <ui:Button text="Add Item to Inventory" name="AddItemButton" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5074355593852495815}
   - component: {fileID: 4111100210556986407}
-  - component: {fileID: 5333800146528322533}
+  - component: {fileID: 2802100927345116857}
   m_Layer: 0
   m_Name: GrassTile
   m_TagString: EditorOnly
@@ -62,7 +62,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5333800146528322533
+--- !u!114 &2802100927345116857
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,7 +71,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 47395432024826302}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89bc8313cdaa7c04e8b94c4a2dd1698e, type: 3}
+  m_Script: {fileID: 11500000, guid: 89d1fcd7240fc0e4580ddef8a327e201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 0}
@@ -83,6 +83,11 @@ MonoBehaviour:
   g: 0
   prev: {fileID: 0}
   placedElement: {fileID: 0}
+  rend: {fileID: 4255131858327650515}
+  spring: {fileID: 2100000, guid: df9453b7d20d4ca429e99f811c15702c, type: 2}
+  summer: {fileID: 2100000, guid: 66096d15a3ae2cf43bc1774c12b83f92, type: 2}
+  fall: {fileID: 2100000, guid: 3dd99ebf997d94a45b323e493b4ae4c9, type: 2}
+  winter: {fileID: 2100000, guid: cec220b9321a13c46b7cefdd5cfae287, type: 2}
 --- !u!1 &2700812255919311640
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,7 +146,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 66096d15a3ae2cf43bc1774c12b83f92, type: 2}
+  - {fileID: 2100000, guid: df9453b7d20d4ca429e99f811c15702c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5074355593852495815}
   - component: {fileID: 4111100210556986407}
-  - component: {fileID: 5333800146528322533}
+  - component: {fileID: 7138395193854472916}
   m_Layer: 0
   m_Name: DarkGrassTile
   m_TagString: EditorOnly
@@ -62,7 +62,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5333800146528322533
+--- !u!114 &7138395193854472916
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,7 +71,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 47395432024826302}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89bc8313cdaa7c04e8b94c4a2dd1698e, type: 3}
+  m_Script: {fileID: 11500000, guid: 89d1fcd7240fc0e4580ddef8a327e201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 0}
@@ -83,6 +83,11 @@ MonoBehaviour:
   g: 0
   prev: {fileID: 0}
   placedElement: {fileID: 0}
+  rend: {fileID: 4255131858327650515}
+  spring: {fileID: 2100000, guid: 2196ede438987df4c9430c23abe511c9, type: 2}
+  summer: {fileID: 2100000, guid: bd21b598519d8c0458efda51f5033733, type: 2}
+  fall: {fileID: 2100000, guid: 27ff7916c05d4904bbeb47d07fc05f32, type: 2}
+  winter: {fileID: 2100000, guid: a738b2f90f9838e4184698e169d8a08e, type: 2}
 --- !u!1 &2700812255919311640
 GameObject:
   m_ObjectHideFlags: 0

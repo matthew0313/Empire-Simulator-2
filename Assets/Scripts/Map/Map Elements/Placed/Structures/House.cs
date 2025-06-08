@@ -1,10 +1,10 @@
+using System;
 using System.Collections.Generic;
 using HexKit3D;
 using UnityEngine;
 
 public class House : Structure, IResidental
 {
-    public MapElement self => this;
 
     [Header("House")]
     [SerializeField] int m_maxResidents;

@@ -1,0 +1,7 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:VisualElement style="flex-grow: 1; justify-content: space-between; flex-direction: row; background-color: rgba(0, 0, 0, 0.08);">
+        <ui:VisualElement name="ItemImage" style="flex-grow: 1; width: 30px; height: 30px; background-image: url(&quot;project://database/Assets/Images/Items/Logs/Oak%20Log.png?fileID=21300000&amp;guid=7154b1afe9bbc5b42ae08e1c9a241839&amp;type=3#Oak Log&quot;); min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;" />
+        <ui:Label text="ItemName" name="ItemName" style="color: rgb(255, 255, 255);" />
+        <ui:Label text="0" name="ItemCount" style="color: rgb(255, 255, 255);" />
+    </ui:VisualElement>
+</ui:UXML>

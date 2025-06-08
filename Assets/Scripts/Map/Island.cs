@@ -30,31 +30,35 @@ public class Island : MonoBehaviour, ISavable
     }
     private void Awake()
     {
-
+        foreach(var i in tilemap.tiles)
+        {
+            if (i.Item2 is MapTile mapTile) mapTile.Set(this);
+        }
     }
     public IEnumerable<MapElement> MapElements()
     {
         foreach (var i in fixedMapElements) yield return i;
         foreach (var i in placedMapElements) yield return i;
     }
-    public IEnumerable<MapElement> SearchElements(Func<MapElement, bool> predicate)
-    {
-        foreach(var i in MapElements())
-        {
-            if (predicate.Invoke(i)) yield return i;
-        }
-    }
     readonly List<MapElement> searchElementsList = new();
-    public IEnumerable<MapElement> SearchElements(Func<MapElement, bool> predicate, Func<MapElement, MapElement, int> comparison)
+    public List<MapElement> SearchElements(Func<MapElement, bool> predicate)
     {
         searchElementsList.Clear();
-        foreach (var i in SearchElements(predicate)) searchElementsList.Add(i);
-        searchElementsList.Sort((a, b) => comparison.Invoke(a, b));
-        foreach(var i in searchElementsList) yield return i;
+        foreach (var i in MapElements())
+        {
+            if (predicate.Invoke(i)) searchElementsList.Add(i);
+        }
+        return searchElementsList;
     }
     public void PlaceElement(PlacedMapElement element)
     {
         placedMapElements.Add(element);
+        onMapElementChange?.Invoke();
+    }
+    public void RemoveElement(PlacedMapElement element)
+    {
+        if (!placedMapElements.Contains(element)) return;
+        placedMapElements.Remove(element);
         onMapElementChange?.Invoke();
     }
     public void Save(SaveData data)

@@ -1,0 +1,17 @@
+.back {
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    background-color: rgba(0, 0, 0, 0.39);
+}
+
+.smallTitle {
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+}
+
+.title {
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+}

@@ -2,7 +2,47 @@ using System.Collections.Generic;
 using HexKit3D;
 using UnityEngine;
 
-public class TreeNode : MapElement
+public class TreeNode : FixedMapElement
 {
-
+    [Header("Tree Node")]
+    [SerializeField] LootTable loot;
+    [SerializeField] Animator anim;
+    [SerializeField] float maxHp = 100.0f;
+    [SerializeField] float respawnTime = 20.0f;
+    [field: SerializeField] public float requiredTier { get; private set; } = 0;
+    public Lumberjack queuedLumberjack;
+    public bool available { get; private set; } = true;
+    float hp, counter = 0.0f;
+    private void Awake()
+    {
+        hp = maxHp;
+    }
+    readonly int fallID = Animator.StringToHash("Fall");
+    readonly int growthID = Animator.StringToHash("Growth");
+    private void Update()
+    {
+        if (!available)
+        {
+            counter = Mathf.Min(counter + Time.deltaTime, respawnTime);
+            anim.SetFloat(growthID, counter / respawnTime);
+            if(counter >= respawnTime)
+            {
+                hp = maxHp;
+                available = true;
+            }
+        }
+    }
+    public void GetDamage(float damage)
+    {
+        hp -= damage;
+        if(hp <= 0.0f)
+        {
+            hp = 0.0f;
+            counter = 0.0f;
+            available = false;
+            anim.SetTrigger(fallID);
+            queuedLumberjack = null;
+            foreach (var i in loot.GetLoot()) EmpireManager.Instance.AddItem(i.item, i.count);
+        }
+    }
 }
