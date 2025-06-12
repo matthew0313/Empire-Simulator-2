@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: Workplaces
   m_EditorClassIdentifier: 
   elements:
-  - type: 1
-    prefab: {fileID: 0}
+  - type: 0
+    prefab: {fileID: 6799353029247077357, guid: 482c108148c7e0f469423df87cabbbc7, type: 3}
+    prefabDatabase: {fileID: 11400000, guid: 81f9d983144fa4d45b40d252dbb88bd1, type: 2}
+  - type: 0
+    prefab: {fileID: 6799353029247077357, guid: 482c108148c7e0f469423df87cabbbc7, type: 3}
     prefabDatabase: {fileID: 11400000, guid: 81f9d983144fa4d45b40d252dbb88bd1, type: 2}

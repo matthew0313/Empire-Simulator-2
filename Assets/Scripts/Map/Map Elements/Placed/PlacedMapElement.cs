@@ -4,8 +4,8 @@ using UnityEngine;
 
 public abstract class PlacedMapElement : MapElement
 {
-    [SerializeField] GameObject m_prefabOrigin;
-    public GameObject prefabOrigin { get; private set; }
+    [Header("Placed map element")]
+    public GameObject prefabOrigin;
 }
 [System.Serializable]
 public class PlacedMapElementSave

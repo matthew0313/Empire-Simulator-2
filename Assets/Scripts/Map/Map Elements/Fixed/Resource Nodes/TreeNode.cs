@@ -18,13 +18,13 @@ public class TreeNode : FixedMapElement
         hp = maxHp;
     }
     readonly int fallID = Animator.StringToHash("Fall");
-    readonly int growthID = Animator.StringToHash("Growth");
+    readonly int regenID = Animator.StringToHash("Regen");
     private void Update()
     {
         if (!available)
         {
             counter = Mathf.Min(counter + Time.deltaTime, respawnTime);
-            anim.SetFloat(growthID, counter / respawnTime);
+            anim.SetFloat(regenID, counter / respawnTime);
             if(counter >= respawnTime)
             {
                 hp = maxHp;

@@ -18,7 +18,7 @@ MonoBehaviour:
   m_itemDesc:
     en: ????
     kr: ????
-  m_itemIcon: {fileID: 21300000, guid: 7154b1afe9bbc5b42ae08e1c9a241839, type: 3}
+  m_itemIcon: {fileID: 21300000, guid: 7df0904f812f8ee4cba36a243ce464b7, type: 3}
   m_durability: 20
   m_tier: 0
   m_damage: 10

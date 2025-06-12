@@ -7,7 +7,7 @@ public class InputManager : MonoBehaviour
 {
     public static InputManager Instance { get; private set; }
     public InputManager() => Instance = this;
-    public Vector2 GetMoveInput() => new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+    public Vector2 GetCameraMoveInput() => new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
     public float GetFlyInput()
     {
         float tmp = 0.0f;
@@ -15,7 +15,6 @@ public class InputManager : MonoBehaviour
         if (Input.GetKey(KeyCode.Q)) tmp -= 1;
         return tmp;
     }
-    public bool GetCameraMoveInput() => Input.GetMouseButton(1);
-    public float GetCameraMoveValueInput() => Input.GetAxis("Mouse X");
+    public Vector2 GetCameraRotateInput() => Input.GetMouseButton(1) ? new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) : Vector2.zero;
     public float GetCameraZoomInput() => Input.mouseScrollDelta.y;
 }

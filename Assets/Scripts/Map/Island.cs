@@ -15,24 +15,18 @@ public class Island : MonoBehaviour, ISavable
     [SerializeField] HexTile m_spawnPoint;
     public HexTilemap tilemap => m_tilemap;
 
-    [Header("Movement Bounds")]
-    [SerializeField] Vector3 moveBoundsCenter, m_moveBoundsMin, m_moveBoundsMax;
-    public Vector3 moveBoundsMin => transform.position + moveBoundsCenter + m_moveBoundsMin;
-    public Vector3 moveBoundsMax => transform.position + moveBoundsCenter + m_moveBoundsMax;
-
     [Header("Map Elements")]
     [SerializeField] List<FixedMapElement> fixedMapElements = new();
     [SerializeField] List<PlacedMapElement> placedMapElements = new();
     public Action onMapElementChange;
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireCube((moveBoundsMax + moveBoundsMin) / 2.0f, moveBoundsMax - moveBoundsMin);
-    }
     private void Awake()
     {
         foreach(var i in tilemap.tiles)
         {
-            if (i.Item2 is MapTile mapTile) mapTile.Set(this);
+            if (i.Item2 is MapTile mapTile)
+            {
+                mapTile.Set(this);
+            }
         }
     }
     public IEnumerable<MapElement> MapElements()
@@ -81,7 +75,6 @@ public class Island : MonoBehaviour, ISavable
         }
         data.islandSaves[islandName] = save;
     }
-
     public void Load(SaveData data)
     {
         IslandSave save = data.islandSaves[islandName];
@@ -92,6 +85,7 @@ public class Island : MonoBehaviour, ISavable
                 i.Load(tmp);
             }
         }
+        foreach (var i in placedMapElements) Destroy(i.gameObject); placedMapElements.Clear();
         foreach(var i in save.placedMapElements)
         {
             if(tilemap.TryGetTile(i.position, out MapTile tile))

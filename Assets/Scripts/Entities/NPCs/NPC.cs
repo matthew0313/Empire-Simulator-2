@@ -302,6 +302,7 @@ public abstract class NPC : Entity
                     {
                         origin.home = residental;
                         residental.residents.Add(origin);
+                        break;
                     }
                 }
             }

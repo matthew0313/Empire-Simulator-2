@@ -96,7 +96,7 @@ public class Lumberjack : NPC
                 }
                 public override void OnStateUpdate()
                 {
-                    if (!origin.selectedTree.available) origin.selectedTree = null;
+                    if (origin.selectedTree != null && !origin.selectedTree.available) origin.selectedTree = null;
                     if (origin.equipment == null)
                     {
                         parentLayer.ChangeState("SearchForTools"); return;
@@ -129,7 +129,7 @@ public class Lumberjack : NPC
                         counter += Time.deltaTime;
                         if(counter >= searchRate)
                         {
-                            counter = 0.0f;
+                            counter = 0.00f;
                             Search();
                         }
                         if(origin.selectedTree != null)

@@ -155,6 +155,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id:
     value: 93a1617c-680e-4adc-9625-f3b08d6193f8
-  m_prefabOrigin: {fileID: 5613317904766623358}
-  m_maxResidents: 1
+  prefabOrigin: {fileID: 5613317904766623358}
+  m_maxResidents: 2
   m_energyGiven: 100
