@@ -3,16 +3,20 @@ using HexKit3D;
 using UnityEngine;
 
 public class OreNode : FixedMapElement
-{
+{   
+    
     [Header("Ore Node")]
     [SerializeField] LootTable loot;
     [SerializeField] Animator anim;
     [SerializeField] float maxHp = 100.0f;
     [SerializeField] float respawnTime = 20.0f;
+    [SerializeField] ParticleSystem mineParticle;
     [field: SerializeField] public float requiredTier { get; private set; } = 0;
     public Miner queuedMiner;
     public bool available { get; private set; } = true;
     float hp, counter = 0.0f;
+
+    public override bool canPass => false;
     private void Awake()
     {
         hp = maxHp;
@@ -35,6 +39,7 @@ public class OreNode : FixedMapElement
     public void GetDamage(float damage)
     {
         hp -= damage;
+        mineParticle.Play();
         if(hp <= 0.0f)
         {
             hp = 0.0f;

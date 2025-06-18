@@ -11,8 +11,10 @@ public abstract class PooledPrefab<T> : MonoBehaviour where T : PooledPrefab<T>
         T tmp = Instantiate(this as T);
         tmp.pool = pool;
         tmp.instantiated = true;
+        tmp.OnCreate();
         return tmp;
     }
+    protected virtual void OnCreate() { }
     public T Get()
     {
         if (instantiated) return null;
@@ -27,6 +29,16 @@ public abstract class PooledPrefab<T> : MonoBehaviour where T : PooledPrefab<T>
             tmp.released = false;
         }
         tmp.OnGet();
+        return tmp;
+    }
+    public T Get(Vector3 position, Quaternion rotation)
+    {
+        T tmp = Get();
+        if(tmp != null)
+        {
+            tmp.transform.position = position;
+            tmp.transform.rotation = rotation;
+        }
         return tmp;
     }
     public void Release()

@@ -12,6 +12,7 @@ public static class Settings
         m_cameraSensitivity = 1.0f;
         m_xRotRange = 75.0f;
         m_yReverse = true;
+        m_volume = 1.0f;
     }
     static Language m_language;
     public static Language language
@@ -97,4 +98,19 @@ public static class Settings
         }
     }
     public static Action onYReverseChange;
+
+    static float m_volume;
+    public static float volume
+    {
+        get => m_volume;
+        set
+        {
+            if (m_volume != value)
+            {
+                m_volume = value;
+                onVolumeChange?.Invoke();
+            }
+        }
+    }
+    public static Action onVolumeChange;
 }

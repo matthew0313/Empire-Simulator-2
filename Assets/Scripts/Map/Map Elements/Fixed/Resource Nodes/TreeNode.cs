@@ -9,10 +9,13 @@ public class TreeNode : FixedMapElement
     [SerializeField] Animator anim;
     [SerializeField] float maxHp = 100.0f;
     [SerializeField] float respawnTime = 20.0f;
+    [SerializeField] ParticleSystem chopParticle;
     [field: SerializeField] public float requiredTier { get; private set; } = 0;
     public Lumberjack queuedLumberjack;
     public bool available { get; private set; } = true;
     float hp, counter = 0.0f;
+
+    public override bool canPass => false;
     private void Awake()
     {
         hp = maxHp;
@@ -43,6 +46,11 @@ public class TreeNode : FixedMapElement
             anim.SetTrigger(fallID);
             queuedLumberjack = null;
             foreach (var i in loot.GetLoot()) EmpireManager.Instance.AddItem(i.item, i.count);
+        }
+        else
+        {
+            chopParticle.transform.rotation = Quaternion.Euler(0, queuedLumberjack.transform.eulerAngles.y + 90.0f, 0);
+            chopParticle.Play();
         }
     }
 }

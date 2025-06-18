@@ -64,7 +64,21 @@ public abstract class NPC : Entity
     float heightRate => GameManager.Instance.npcHeightRate;
 
     //navigation
-    public bool isNavigating { get; private set; } = false;
+
+    readonly int isNavigatingID = Animator.StringToHash("IsNavigating");
+    bool m_isNavigating = false;
+    public bool isNavigating
+    {
+        get => m_isNavigating;
+        set
+        {
+            if(m_isNavigating != value)
+            {
+                m_isNavigating = value;
+                anim.SetBool(isNavigatingID, value);
+            }
+        }
+    }
     float moveSpeed => GameManager.Instance.baseNPCMoveSpeed * moveSpeedMultiplier;
     float stopDistance => GameManager.Instance.npcNavigationStopDistance;
     (CoroutineHandle, Action) navigating;
@@ -122,21 +136,24 @@ public abstract class NPC : Entity
         isNavigating = false;
         navigating.Item2?.Invoke();
     }
+    public void LookAt(Vector3 targetPos)
+    {
+        targetRotation = Mathf.Atan2(targetPos.x - currentPos.x, targetPos.z - currentPos.z) * Mathf.Rad2Deg;
+    }
     Vector3 currentPos => new Vector3(transform.position.x, 0.0f, transform.position.z);
     IEnumerator<float> Navigating(HexTilemapPath<MapTile> path, Action onFinish)
     {
         foreach(var next in path.route)
         {
             Vector3 targetPos = new Vector3(next.transform.position.x, 0.0f, next.transform.position.z);
+            LookAt(targetPos);
             while (Vector3.Distance(currentPos, targetPos) > stopDistance)
             {
                 if (!next.isWalkable)
                 {
-                    isNavigating = false;
-                    onFinish?.Invoke();
+                    StopNavigating();
                     yield break;
                 }
-                targetRotation = Mathf.Atan2(targetPos.x - currentPos.x, targetPos.z - currentPos.z) * Mathf.Rad2Deg;
                 transform.Translate(Vector3.ClampMagnitude((targetPos - currentPos).normalized * moveSpeed * Time.deltaTime, Vector3.Distance(targetPos, currentPos)), Space.World);
                 yield return Timing.WaitForOneFrame;
             }
@@ -165,6 +182,7 @@ public abstract class NPC : Entity
         this.equipment = equipment.Create();
         Sheathe();
     }
+    readonly int isHoldingID = Animator.StringToHash("IsHolding");
     public void Sheathe()
     {
         if (equipment == null) return;
@@ -172,6 +190,7 @@ public abstract class NPC : Entity
         equipment.transform.localScale = Vector3.one;
         equipment.transform.localPosition = Vector3.zero;
         equipment.transform.localRotation = Quaternion.identity;
+        anim.SetBool(isHoldingID, false);
     }
     public void UnSheathe()
     {
@@ -180,6 +199,13 @@ public abstract class NPC : Entity
         equipment.transform.localScale = Vector3.one;
         equipment.transform.localPosition = Vector3.zero;
         equipment.transform.localRotation = Quaternion.identity;
+        anim.SetBool(isHoldingID, true);
+    }
+    public void EquipmentDamage(float damage)
+    {
+        if (equipment == null) return;
+        equipment.LoseDurability(damage);
+        if(equipment == null) anim.SetBool(isHoldingID, false);
     }
     protected abstract List<IWorkplace> GetAvailableJobs();
     protected class NPC_FSMVals : FSMVals
@@ -238,7 +264,7 @@ public abstract class NPC : Entity
                 {
                     if (Cubic.Distance(origin.position, destinationGetter.Invoke()) <= toleranceGetter.Invoke())
                     {
-                        onArrival?.Invoke(); return;
+                        origin.StopNavigating(); onArrival?.Invoke(); return;
                     }
                     else
                     {

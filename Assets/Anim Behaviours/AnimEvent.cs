@@ -18,37 +18,35 @@ public class AnimEvent : StateMachineBehaviour
     {
         if (channel == null) channel = animator.GetComponent<AnimEventChannel>();
         invoked = false;
+        Debug.Log(channel);
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (channel == null || channel.eventCount >= eventIndex || eventIndex < 0) return;
-        if (!invoked)
+        if (channel == null || invoked) return;
+        if (settings.timeMode == AnimEventTimeMode.RelativeTime)
         {
-            if(settings.timeMode == AnimEventTimeMode.RelativeTime)
+            if (stateInfo.normalizedTime >= settings.relativeTime)
             {
-                if(stateInfo.normalizedTime >= settings.relativeTime)
-                {
-                    channel.CallEvent(eventIndex);
-                    invoked = true;
-                }
+                channel.CallEvent(eventIndex);
+                invoked = true;
             }
-            if(settings.timeMode == AnimEventTimeMode.Seconds)
+        }
+        if (settings.timeMode == AnimEventTimeMode.Seconds)
+        {
+            if (stateInfo.normalizedTime * stateInfo.length >= settings.seconds)
             {
-                if(stateInfo.normalizedTime * stateInfo.length >= settings.seconds)
-                {
-                    channel.CallEvent(eventIndex);
-                    invoked = true;
-                }
+                channel.CallEvent(eventIndex);
+                invoked = true;
             }
-            if(settings.timeMode == AnimEventTimeMode.Frames)
+        }
+        if (settings.timeMode == AnimEventTimeMode.Frames)
+        {
+            if (stateInfo.normalizedTime * stateInfo.length >= settings.frames * 1.0f / 60.0f)
             {
-                if(stateInfo.normalizedTime * stateInfo.length >= settings.frames * 1.0f / 60.0f)
-                {
-                    channel.CallEvent(eventIndex);
-                    invoked = true;
-                }
+                channel.CallEvent(eventIndex);
+                invoked = true;
             }
         }
     }
