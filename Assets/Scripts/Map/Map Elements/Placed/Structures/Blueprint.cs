@@ -19,7 +19,7 @@ public class Blueprint : PlacedMapElement, IWorkplace
     public void AddProgress(float amount)
     {
         progress += amount;
-        if (progress >= amount)
+        if (progress >= progressRequired)
         {
             var tmp = Instantiate(structure, transform.position, transform.rotation);
             placedIsland.PlaceElement(tmp);
@@ -86,7 +86,6 @@ public class Blueprint : PlacedMapElement, IWorkplace
         foreach (var i in GetComponentsInChildren<MeshRenderer>())
         {
             if (i.gameObject.CompareTag("Indicator")) continue;
-            Debug.Log(i);
             meshes.Add((i, new List<Material>(i.materials)));
         }
     }

@@ -62,9 +62,8 @@ public class Lumberjack : NPC
         return availableJobsList;
     }
     float chopRate => 1.0f;
-    float energyPerChop => 1.0f;
-    float durabilityPerChop => 1.0f;
     float damageMultiplier => 1.0f;
+    float durabilityPerChop => 1.0f;
     class Lumberjack_TopLayer : NPC_TopLayer<Lumberjack>
     {
         public Lumberjack_TopLayer(Lumberjack origin, NPC_FSMVals values) : base(origin, values) { }
@@ -87,10 +86,15 @@ public class Lumberjack : NPC
                     AddState("MoveToTree", new MoveToTree(origin, this));
                     AddState("ChopTree", new ChopTree(origin, this));
                 }
+                readonly int isHoldingID = Animator.StringToHash("IsHolding");
                 public override void OnStateEnter()
                 {
                     base.OnStateEnter();
-                    origin.UnSheathe();
+                    origin.equipment.transform.SetParent(origin.heldAnchor);
+                    origin.equipment.transform.localScale = Vector3.one;
+                    origin.equipment.transform.localPosition = Vector3.zero;
+                    origin.equipment.transform.localRotation = Quaternion.identity;
+                    origin.anim.SetBool(isHoldingID, true);
                 }
                 public override void OnStateUpdate()
                 {
@@ -104,7 +108,12 @@ public class Lumberjack : NPC
                 public override void OnStateExit()
                 {
                     base.OnStateExit();
-                    origin.Sheathe();
+                    if (origin.equipment == null) return;
+                    origin.equipment.transform.SetParent(origin.sheatheAnchor);
+                    origin.equipment.transform.localScale = Vector3.one;
+                    origin.equipment.transform.localPosition = Vector3.zero;
+                    origin.equipment.transform.localRotation = Quaternion.identity;
+                    origin.anim.SetBool(isHoldingID, false);
                 }
                 class SearchTree : State<Lumberjack>
                 {
@@ -203,9 +212,9 @@ public class Lumberjack : NPC
                         origin.anim.SetTrigger(chopID);
                         chopping = Timing.RunCoroutine(CoroutineUtility.WaitThen(origin.chopTime, () =>
                         {
-                            origin.selectedTree.GetDamage((origin.equipment as Axe).data.damage * origin.damageMultiplier);
+                            origin.selectedTree.GetDamage((origin.equipment as Axe).data.damage * origin.damageMultiplier * origin.workAmountMultiplier);
                             origin.EquipmentDamage(origin.durabilityPerChop);
-                            origin.LoseEnergy(origin.energyPerChop);
+                            origin.LoseEnergy((origin.equipment as Axe).data.energyPerUse);
                         }));
                     }
                 }

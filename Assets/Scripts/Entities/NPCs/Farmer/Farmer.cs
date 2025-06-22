@@ -45,9 +45,8 @@ public class Farmer : NPC
         return availableJobsList;
     }
     float farmRate => 1.0f;
-    float energyPerFarm => 1.0f;
+    float growthMultiplier => 1.0f;
     float durabilityPerFarm => 1.0f;
-    float growthMultiplier = 1.0f;
     class Farmer_TopLayer : NPC_TopLayer<Farmer>
     {
         public Farmer_TopLayer(Farmer origin, NPC_FSMVals values) : base(origin, values)
@@ -72,15 +71,25 @@ public class Farmer : NPC
                     defaultState = new Farming(origin, this);
                     AddState("Farming", defaultState);
                 }
+                readonly int isHoldingID = Animator.StringToHash("IsHolding");
                 public override void OnStateEnter()
                 {
                     base.OnStateEnter();
-                    origin.UnSheathe();
+                    origin.equipment.transform.SetParent(origin.heldAnchor);
+                    origin.equipment.transform.localScale = Vector3.one;
+                    origin.equipment.transform.localPosition = Vector3.zero;
+                    origin.equipment.transform.localRotation = Quaternion.identity;
+                    origin.anim.SetBool(isHoldingID, true);
                 }
                 public override void OnStateExit()
                 {
                     base.OnStateExit();
-                    origin.Sheathe();
+                    if (origin.equipment == null) return;
+                    origin.equipment.transform.SetParent(origin.sheatheAnchor);
+                    origin.equipment.transform.localScale = Vector3.one;
+                    origin.equipment.transform.localPosition = Vector3.zero;
+                    origin.equipment.transform.localRotation = Quaternion.identity;
+                    origin.anim.SetBool(isHoldingID, false);
                 }
                 class Farming : State<Farmer>
                 {
@@ -116,9 +125,9 @@ public class Farmer : NPC
                         origin.anim.SetTrigger(farmID);
                         farming = Timing.RunCoroutine(CoroutineUtility.WaitThen(origin.farmTime, () =>
                         {
-                            (origin.workplace as Farm).AddGrowth((origin.equipment as Sickle).data.growth * origin.growthMultiplier);
+                            (origin.workplace as Farm).AddGrowth((origin.equipment as Sickle).data.growth * origin.growthMultiplier * origin.workAmountMultiplier);
                             origin.EquipmentDamage(origin.durabilityPerFarm);
-                            origin.LoseEnergy(origin.energyPerFarm);
+                            origin.LoseEnergy((origin.equipment as Sickle).data.energyPerUse);
                         }));
                     }
                 }

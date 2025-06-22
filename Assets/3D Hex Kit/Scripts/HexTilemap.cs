@@ -38,18 +38,22 @@ namespace HexKit3D
         readonly List<HexTile> searchQueue = new(), searched = new();
         public bool TryGetTile<T>(Cubic cubic, out T tile) where T : HexTile
         {
+            /*var tmp = placedTiles.Find(value => value.cubic == cubic);
+            if(tmp.tile is T)
+            {
+                tile = tmp.tile as T;
+                return true;
+            }
+            tile = null;
+            return false;*/
             int tmp = placedTiles.LowerBound((a, b) => Cubic.Compare(a.cubic, b.cubic), new() { cubic = cubic });
-            if(tmp != -1 && placedTiles[tmp].tile is T)
+            if (tmp != -1 && placedTiles[tmp].tile is T)
             {
                 tile = placedTiles[tmp].tile as T;
                 return true;
             }
             tile = null;
             return false;
-        }
-        private void Update()
-        {
-            TryGetTile<HexTile>(new Cubic(1000, 1000, 1000), out _);
         }
         public HexTilemapPath<T> FindPath<T>(Cubic startPosition, Cubic endPosition) where T : HexTile
         {

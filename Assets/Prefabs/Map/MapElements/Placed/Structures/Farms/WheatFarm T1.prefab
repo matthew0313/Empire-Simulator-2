@@ -55,12 +55,14 @@ MonoBehaviour:
   placedIsland: {fileID: 0}
   m_id: WheatFarm T1
   m_structureName:
-    en: 
-    kr: 
+    en: Wheat Farm T1
+    kr: "\uBC00 \uB18D\uC7A5 T1"
   m_structureDesc:
-    en: 
-    kr: 
-  m_buildIngredients: []
+    en: A seedy place.
+    kr: "\uC528\uC557\uC774 \uC790\uB77C\uB098\uB294 \uACF3\uC785\uB2C8\uB2E4."
+  m_buildIngredients:
+  - item: {fileID: 11400000, guid: 15f7fcb979ac78f41a587920a3eaa369, type: 2}
+    count: 150
   m_buildLevelRequirement: 1
   m_buildMaxWorkers: 3
   m_buildProgressRequired: 100

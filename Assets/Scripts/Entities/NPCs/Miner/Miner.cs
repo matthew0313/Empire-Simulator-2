@@ -3,11 +3,6 @@ using HexKit3D;
 using UnityEngine;
 using MEC;
 using System.Collections.Generic;
-using UnityEngine.UI;
-using UnityEngine.Rendering;
-using UnityEngine.InputSystem.Android;
-using Unity.VisualScripting;
-using System.Net.NetworkInformation;
 
 public class Miner : NPC
 {
@@ -67,9 +62,8 @@ public class Miner : NPC
         return availableJobsList;
     }
     float mineRate => 1.0f;
-    float energyPerMine => 1.0f;
-    float durabilityPerMine => 1.0f;
     float damageMultiplier => 1.0f;
+    float durabilityPerMine => 1.0f;
     class Miner_TopLayer : NPC_TopLayer<Miner>
     {
         public Miner_TopLayer(Miner origin, NPC_FSMVals values) : base(origin, values) { }
@@ -92,10 +86,16 @@ public class Miner : NPC
                     AddState("MoveToOre", new MoveToOre(origin, this));
                     AddState("MineOre", new MineOre(origin, this));
                 }
+
+                readonly int isHoldingID = Animator.StringToHash("IsHolding");
                 public override void OnStateEnter()
                 {
                     base.OnStateEnter();
-                    origin.UnSheathe();
+                    origin.equipment.transform.SetParent(origin.heldAnchor);
+                    origin.equipment.transform.localScale = Vector3.one;
+                    origin.equipment.transform.localPosition = Vector3.zero;
+                    origin.equipment.transform.localRotation = Quaternion.identity;
+                    origin.anim.SetBool(isHoldingID, true);
                 }
                 public override void OnStateUpdate()
                 {
@@ -109,7 +109,12 @@ public class Miner : NPC
                 public override void OnStateExit()
                 {
                     base.OnStateExit();
-                    origin.Sheathe();
+                    if (origin.equipment == null) return;
+                    origin.equipment.transform.SetParent(origin.sheatheAnchor);
+                    origin.equipment.transform.localScale = Vector3.one;
+                    origin.equipment.transform.localPosition = Vector3.zero;
+                    origin.equipment.transform.localRotation = Quaternion.identity;
+                    origin.anim.SetBool(isHoldingID, false);
                 }
                 class SearchOre : State<Miner>
                 {
@@ -208,9 +213,9 @@ public class Miner : NPC
                         origin.anim.SetTrigger(mineID);
                         mining = Timing.RunCoroutine(CoroutineUtility.WaitThen(origin.mineTime, () =>
                         {
-                            origin.selectedOre.GetDamage((origin.equipment as Pickaxe).data.damage * origin.damageMultiplier);
+                            origin.selectedOre.GetDamage((origin.equipment as Pickaxe).data.damage * origin.damageMultiplier * origin.workAmountMultiplier);
                             origin.EquipmentDamage(origin.durabilityPerMine);
-                            origin.LoseEnergy(origin.energyPerMine);
+                            origin.LoseEnergy((origin.equipment as Pickaxe).data.energyPerUse);
                         }));
                     }
                 }

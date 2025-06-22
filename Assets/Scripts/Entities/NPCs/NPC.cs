@@ -56,6 +56,11 @@ public abstract class NPC : Entity
     [SerializeField] protected Transform sheatheAnchor;
     [SerializeField] protected Transform heldAnchor;
 
+    [Header("Multipliers")]
+    public float energyConsuptionMultiplier = 1.0f;
+    public float durabilityConsuptionMultiplier = 1.0f;
+    public float workAmountMultiplier = 1.0f;
+
     //rotation
     float rotateRate => GameManager.Instance.npcRotateRate;
     protected float targetRotation = 0.0f;
@@ -175,36 +180,22 @@ public abstract class NPC : Entity
     }
     public virtual void LoseEnergy(float amount)
     {
-        energy -= amount;
-    }
-    public void SetEquipment(EquipmentData equipment)
-    {
-        this.equipment = equipment.Create();
-        Sheathe();
+        energy = Mathf.Max(energy - amount * energyConsuptionMultiplier, 0.0f);
     }
     readonly int isHoldingID = Animator.StringToHash("IsHolding");
-    public void Sheathe()
+    public void SetEquipment(EquipmentData equipmentData)
     {
-        if (equipment == null) return;
+        equipment = equipmentData.Create();
         equipment.transform.SetParent(sheatheAnchor);
         equipment.transform.localScale = Vector3.one;
         equipment.transform.localPosition = Vector3.zero;
         equipment.transform.localRotation = Quaternion.identity;
         anim.SetBool(isHoldingID, false);
     }
-    public void UnSheathe()
-    {
-        if (equipment == null) return;
-        equipment.transform.SetParent(heldAnchor);
-        equipment.transform.localScale = Vector3.one;
-        equipment.transform.localPosition = Vector3.zero;
-        equipment.transform.localRotation = Quaternion.identity;
-        anim.SetBool(isHoldingID, true);
-    }
     public void EquipmentDamage(float damage)
     {
         if (equipment == null) return;
-        equipment.LoseDurability(damage);
+        equipment.LoseDurability(damage * durabilityConsuptionMultiplier);
         if(equipment == null) anim.SetBool(isHoldingID, false);
     }
     protected abstract List<IWorkplace> GetAvailableJobs();
@@ -455,11 +446,19 @@ public abstract class NPC : Entity
                     }
                 }
             }
-            protected abstract class NPC_Working<T> : Layer<T>
+            protected abstract class NPC_Working<T> : Layer<T> where T : NPC
             {
                 protected NPC_Working(T origin, Layer<T> parent) : base(origin, parent)
                 {
 
+                }
+                public override void OnStateUpdate()
+                {
+                    if(origin.workplace == null)
+                    {
+                        parentLayer.ChangeState("LookForWork"); return;
+                    }
+                    base.OnStateUpdate();
                 }
             }
         }
