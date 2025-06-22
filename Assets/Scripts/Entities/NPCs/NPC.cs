@@ -235,6 +235,12 @@ public abstract class NPC : Entity
                 currentState = states["Resting"];
             }
         }
+        public override void OnStateUpdate()
+        {
+            if (origin.home != null && origin.home.self == null) origin.home = null;
+            if (origin.workplace != null && origin.workplace.self == null) origin.workplace = null;
+            base.OnStateUpdate();
+        }
         protected abstract NPC_WorkLayer<T> GetState_WorkLayer();
 
         //Utility States
@@ -341,7 +347,7 @@ public abstract class NPC : Entity
                 AddState("LookForWork", defaultState);
                 AddState("GoToWork", new NPC_Navigate<T>(origin, this,
                     () => origin.workplace.self.position,
-                    () => origin.workplace.self.canPass ? 0 : 1,
+                    () => origin.assignedIsland.tilemap.TryGetTile<MapTile>(origin.workplace.self.position, out MapTile tile) && tile.isWalkable ? 0 : 1,
                     () => ChangeState("Working")));
                 AddState("Working", GetState_Working());
             }
@@ -463,7 +469,7 @@ public abstract class NPC : Entity
             {
                 defaultState = new NPC_Navigate<T>(origin, this,
                     () => origin.home.self.position,
-                    () => origin.home.self.canPass ? 0 : 1,
+                    () => origin.assignedIsland.tilemap.TryGetTile(origin.home.self.position, out MapTile tile) && tile.isWalkable ? 0 : 1,
                     () => ChangeState("Resting"));
                 AddState("GoHome", defaultState);
                 AddState("Resting", new Resting(origin, this));

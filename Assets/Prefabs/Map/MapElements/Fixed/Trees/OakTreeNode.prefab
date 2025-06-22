@@ -1,5 +1,86 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &885806876787765256
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7023502011819159256}
+  - component: {fileID: 5260995509758193298}
+  - component: {fileID: 7943202130443043185}
+  m_Layer: 8
+  m_Name: Obstruction
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7023502011819159256
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 885806876787765256}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9146729545956221636}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &5260995509758193298
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 885806876787765256}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!135 &7943202130443043185
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 885806876787765256}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.3
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1622537960832923131
 GameObject:
   m_ObjectHideFlags: 0
@@ -4978,6 +5059,7 @@ Transform:
   m_Children:
   - {fileID: 6026923230483167326}
   - {fileID: 7341293984439832063}
+  - {fileID: 7023502011819159256}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 30, z: 0}
 --- !u!114 &744217330528615127
@@ -4992,15 +5074,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be16b79a089208c498fbecfb24484c16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id:
-    value: 4911b7d9-85da-42ea-a64d-d43743cb640f
+  placedIsland: {fileID: 0}
+  m_id:
+    value: 
   loot: {fileID: 11400000, guid: 5aad603f0015de04181b1a5fcce24c53, type: 2}
   anim: {fileID: 3783992209391582235}
   maxHp: 100
   respawnTime: 20
-  chopParticle: {fileID: 3054401200119703725}
   <requiredTier>k__BackingField: 0
   queuedLumberjack: {fileID: 0}
+  chopParticle: {fileID: 3054401200119703725}
 --- !u!1001 &797216524336741826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5009,6 +5092,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6026923230483167326}
     m_Modifications:
+    - target: {fileID: 814048553178134716, guid: fca72393355b02041ae744b78d641405, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 814048553178134716, guid: fca72393355b02041ae744b78d641405, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1812492621192364926, guid: fca72393355b02041ae744b78d641405, type: 3}
       propertyPath: m_Name
       value: SM_tree_a_01

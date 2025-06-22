@@ -17,4 +17,5 @@ public class InputManager : MonoBehaviour
     }
     public Vector2 GetCameraRotateInput() => Input.GetMouseButton(1) ? new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) : Vector2.zero;
     public float GetCameraZoomInput() => Input.mouseScrollDelta.y;
+    public bool GetExitInput() => Input.GetKeyDown(KeyCode.Escape);
 }

@@ -1,9 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class FoodData : ItemData, ISavable
 {
     [SerializeField] float energyRestored = 10.0f;
     public int selectionPriority = 0;
+
+    public override LangText itemDesc => base.itemDesc + new LangText()
+    {
+        en = $"\n\nEnergy Restored: {energyRestored}",
+        kr = $"\n\n에너지 충전량: {energyRestored}"
+    };
     public virtual void OnConsume(NPC consumer)
     {
         consumer.energy += energyRestored;

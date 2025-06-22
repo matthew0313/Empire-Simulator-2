@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b4536e93916cab468e584aa39e85aae, type: 3}
+  m_Name: Wheat
+  m_EditorClassIdentifier: 
+  m_itemName:
+    en: Wheat
+    kr: "\uBC00"
+  m_itemDesc:
+    en: Primary ingredient used for most bakery food.
+    kr: "\uC81C\uBE75\uB958\uC5D0 \uC0AC\uC6A9\uB418\uB294 \uC8FC\uC7AC\uB8CC\uC785\uB2C8\uB2E4."
+  m_category: 4
+  m_itemIcon: {fileID: 21300000, guid: e1c68e55bcae6f645a1f6751889a8a6a, type: 3}

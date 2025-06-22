@@ -60,9 +60,9 @@ public class Miner : NPC
     protected override List<IWorkplace> GetAvailableJobs()
     {
         availableJobsList.Clear();
-        foreach(var i in assignedIsland.SearchElements(element => element is MinerHut))
+        foreach(var i in assignedIsland.SearchElements(element => element is MinerStation))
         {
-            if((i as MinerHut).levelRequirement <= level) availableJobsList.Add(i as IWorkplace);
+            if((i as MinerStation).levelRequirement <= level) availableJobsList.Add(i as IWorkplace);
         }
         return availableJobsList;
     }
@@ -142,7 +142,7 @@ public class Miner : NPC
                     }
                     void Search()
                     {
-                        var list = (origin.workplace as MinerHut).SearchOres();
+                        var list = (origin.workplace as MinerStation).SearchOres();
                         list.RemoveAll(node => !node.available || node.requiredTier > (origin.equipment as Pickaxe).data.tier || node.queuedMiner != null);
                         if(list.Count > 0)
                         {

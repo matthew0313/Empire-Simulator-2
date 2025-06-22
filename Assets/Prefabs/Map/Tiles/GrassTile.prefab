@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5074355593852495815}
   - component: {fileID: 4111100210556986407}
   - component: {fileID: 2802100927345116857}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GrassTile
   m_TagString: EditorOnly
   m_Icon: {fileID: 0}
@@ -76,18 +76,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   owner: {fileID: 0}
   position:
-    q: 0
-    r: 0
+    q: -8
+    r: 8
     s: 0
   h: 0
   g: 0
   prev: {fileID: 0}
-  placedElement: {fileID: 0}
-  rend: {fileID: 4255131858327650515}
-  spring: {fileID: 2100000, guid: df9453b7d20d4ca429e99f811c15702c, type: 2}
-  summer: {fileID: 2100000, guid: 66096d15a3ae2cf43bc1774c12b83f92, type: 2}
-  fall: {fileID: 2100000, guid: 3dd99ebf997d94a45b323e493b4ae4c9, type: 2}
-  winter: {fileID: 2100000, guid: cec220b9321a13c46b7cefdd5cfae287, type: 2}
 --- !u!1 &2700812255919311640
 GameObject:
   m_ObjectHideFlags: 0
@@ -101,7 +95,9 @@ GameObject:
   - component: {fileID: 11724404038861455}
   - component: {fileID: 6391674514459467270}
   - component: {fileID: 3298617210332401135}
-  m_Layer: 0
+  - component: {fileID: 5892022985108446196}
+  - component: {fileID: 839653331725227402}
+  m_Layer: 3
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -210,9 +206,38 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &5892022985108446196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2700812255919311640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6caec441f29e1054aba7e2735f780e5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &839653331725227402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2700812255919311640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff185f2bf91800742986e69319231f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rend: {fileID: 4255131858327650515}
+  spring: {fileID: 2100000, guid: df9453b7d20d4ca429e99f811c15702c, type: 2}
+  summer: {fileID: 2100000, guid: 03e8c7cfe0337924e9b1a0066c8817cd, type: 2}
+  fall: {fileID: 2100000, guid: 797f46a8138c263459acb41f9f8bbd91, type: 2}
+  winter: {fileID: 2100000, guid: 6dba46d6aaa941b4e9a1d1881989ded5, type: 2}
 --- !u!1 &7275149377602682986
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,7 +250,7 @@ GameObject:
   - component: {fileID: 8333823922550248573}
   - component: {fileID: 2971350053354162404}
   - component: {fileID: 4570956050456823459}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Edge
   m_TagString: Untagged
   m_Icon: {fileID: 0}

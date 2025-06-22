@@ -13,6 +13,7 @@ namespace HexKit3D.Editor
         float heightOffset = 0.0f;
         HexPlacerMode mode;
         HexPlacerReplaceMode replaceMode;
+        int maxFill = 2000;
 
         //controls
         float heightOffsetIncrement = 0.5f;
@@ -37,6 +38,10 @@ namespace HexKit3D.Editor
             if(mode == HexPlacerMode.Placing)
             {
                 replaceMode = (HexPlacerReplaceMode)EditorGUILayout.EnumPopup("Replace Mode", replaceMode);
+            }
+            if(mode == HexPlacerMode.Fill)
+            {
+                maxFill = EditorGUILayout.IntField("Max Fill", maxFill);
             }
 
             EditorGUILayout.Space(10);
@@ -119,7 +124,7 @@ namespace HexKit3D.Editor
                         Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
                         float t = (target.transform.position.y + heightOffset - ray.origin.y) / ray.direction.y;
                         Vector3 point = ray.origin + ray.direction * t;
-                        Cubic hex = Cubic.PosToCubic(target.transform.InverseTransformPoint(point), target.tileSize);
+                        Cubic hex = target.PosToCubic(point);
 
                         if (preview == null)
                         {
@@ -129,11 +134,11 @@ namespace HexKit3D.Editor
                         }
                         else if (previewPrefab != placingPrefab)
                         {
-                            DestroyImmediate(preview);
+                            DestroyImmediate(preview.gameObject);
                             previewPrefab = placingPrefab;
                             preview = PrefabUtility.InstantiatePrefab(previewPrefab, target.transform) as HexTile;
                         }
-                        Vector3 pos = Cubic.CubicToPos(hex, target.transform.position.y + heightOffset, target.tileSize);
+                        Vector3 pos = target.CubicToPos(hex) + Vector3.up * heightOffset;
                         preview.transform.localPosition = pos;
                         placementPreview.gameObject.SetActive(true);
                         placementPreview.transform.position = target.transform.TransformPoint(pos) + Vector3.up * 0.05f;
@@ -142,27 +147,27 @@ namespace HexKit3D.Editor
 
                         if (mouseHeld)
                         {
-                            HexTile found = target.placedTiles.Find(item => item.position == hex);
-                            if (found == null)
+                            CubicTilePair found = target.placedTiles.Find(item => item.cubic == hex);
+                            if (found.tile == null)
                             {
                                 preview.position = hex;
                                 preview.owner = target;
                                 preview.gameObject.hideFlags = HideFlags.None;
                                 EditorUtility.SetDirty(preview);
                                 PrefabUtility.RecordPrefabInstancePropertyModifications(preview);
-                                target.placedTiles.Add(preview);
+                                target.AddTile(preview, hex);
                                 preview = null;
                             }
                             else if (replaceMode == HexPlacerReplaceMode.Replace)
                             {
-                                target.placedTiles.Remove(found);
-                                DestroyImmediate(found.gameObject);
+                                target.RemoveTile(found.cubic);
+                                DestroyImmediate(found.tile.gameObject);
                                 preview.position = hex;
                                 preview.owner = target;
                                 preview.gameObject.hideFlags = HideFlags.None;
                                 EditorUtility.SetDirty(preview);
                                 PrefabUtility.RecordPrefabInstancePropertyModifications(preview);
-                                target.placedTiles.Add(preview);
+                                target.AddTile(preview, hex);
                                 preview = null;
                             }
                         }
@@ -191,9 +196,9 @@ namespace HexKit3D.Editor
                         Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
                         float t = (target.transform.position.y + heightOffset - ray.origin.y) / ray.direction.y;
                         Vector3 point = ray.origin + ray.direction * t;
-                        Cubic hex = Cubic.PosToCubic(target.transform.InverseTransformPoint(point), target.tileSize);
+                        Cubic hex = target.PosToCubic(point);
 
-                        Vector3 pos = Cubic.CubicToPos(hex, target.transform.position.y + heightOffset, target.tileSize);
+                        Vector3 pos = target.CubicToPos(hex) + Vector3.up * heightOffset;
                         placementPreview.gameObject.SetActive(true);
                         placementPreview.transform.position = target.transform.TransformPoint(pos) + Vector3.up * 0.05f;
                         placementPreview.outerRadius = target.tileSize;
@@ -201,11 +206,10 @@ namespace HexKit3D.Editor
 
                         if (mouseHeld)
                         {
-                            HexTile found = target.placedTiles.Find(item => item.position == hex);
-                            if (found != null)
+                            if(target.TryGetTile(hex, out HexTile tile))
                             {
-                                target.placedTiles.Remove(found);
-                                DestroyImmediate(found.gameObject);
+                                target.RemoveTile(hex);
+                                DestroyImmediate(tile.gameObject);
                             }
                         }
                     }
@@ -214,9 +218,77 @@ namespace HexKit3D.Editor
                         placementPreview.gameObject.SetActive(false);
                     }
                     if (preview != null) DestroyImmediate(preview.gameObject); break;
+                case HexPlacerMode.Fill:
+                    if (Event.current.type == EventType.MouseDown && Event.current.button == 0) Event.current.Use();
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.E)
+                    {
+                        Event.current.Use();
+                        heightOffset += heightOffsetIncrement;
+                        Repaint();
+                    }
+                    if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Q)
+                    {
+                        Event.current.Use();
+                        heightOffset -= heightOffsetIncrement;
+                        Repaint();
+                    }
+                    if (target != null && placingPrefab != null)
+                    {
+                        Ray ray = HandleUtility.GUIPointToWorldRay(mousePos);
+                        float t = (target.transform.position.y + heightOffset - ray.origin.y) / ray.direction.y;
+                        Vector3 point = ray.origin + ray.direction * t;
+                        Cubic hex = target.PosToCubic(point);
+
+                        Vector3 pos = target.CubicToPos(hex) + Vector3.up * heightOffset;
+                        placementPreview.gameObject.SetActive(true);
+                        placementPreview.transform.position = target.transform.TransformPoint(pos) + Vector3.up * 0.05f;
+                        placementPreview.outerRadius = target.tileSize;
+                        placementPreview.innerRadius = target.tileSize - 0.05f;
+
+                        if (mouseHeld)
+                        {
+                            Fill(hex);
+                        }
+                    }
+                    if (preview != null) DestroyImmediate(preview.gameObject); break;
                 case HexPlacerMode.None:
                     placementPreview.gameObject.SetActive(false);
                     if (preview != null) DestroyImmediate(preview.gameObject); break;
+            }
+        }
+        readonly List<Cubic> toFill = new();
+        void Fill(Cubic hex)
+        {
+            toFill.Clear();
+            if (!target.TryGetTile(hex, out HexTile tile)) FillSearch(hex);
+            if (toFill.Count > 2000) return;
+
+            foreach(var i in toFill)
+            {
+                HexTile tmp = PrefabUtility.InstantiatePrefab(placingPrefab, target.transform) as HexTile;
+                tmp.position = i;
+                tmp.transform.position = target.CubicToPos(i) + Vector3.up * heightOffset;
+                tmp.owner = target;
+                EditorUtility.SetDirty(tmp);
+                PrefabUtility.RecordPrefabInstancePropertyModifications(tmp);
+                target.AddTile(tmp, i);
+            }
+        }
+        Cubic[] dir = new Cubic[6]
+        {
+            new(1, -1, 0), new(-1, 1, 0), new(0, 1, -1), new(0, -1, 1), new(1, 0, -1), new(-1, 0, 1)
+        };
+        void FillSearch(Cubic hex)
+        {
+            Debug.Log("Fill");
+            toFill.Add(hex);
+            for(int i = 0; i < 6; i++)
+            {
+                if (toFill.Count > 2000) return;
+                if (!target.TryGetTile(hex + dir[i], out HexTile tile) && !toFill.Contains(hex + dir[i]))
+                {
+                    FillSearch(hex + dir[i]);
+                }
             }
         }
 
@@ -231,7 +303,7 @@ namespace HexKit3D.Editor
                 int index = 0;
                 for(; i < target.placedTiles.Count; i++)
                 {
-                    if (target.placedTiles[i].height < minTileHeight || target.placedTiles[i].height > maxTileHeight) continue;
+                    if (target.placedTiles[i].tile.height < minTileHeight || target.placedTiles[i].tile.height > maxTileHeight) continue;
                     if(heightViewers.Count <= index)
                     {
                         TextHexRenderer tmp = Instantiate(EditorResources.hexTextPreviewPrefab);
@@ -240,9 +312,9 @@ namespace HexKit3D.Editor
                         heightViewers.Add(tmp);
                     }
                     heightViewers[index].gameObject.SetActive(true);
-                    heightViewers[index].transform.position = target.placedTiles[i].transform.position + Vector3.up * 0.025f;
+                    heightViewers[index].transform.position = target.placedTiles[i].tile.transform.position + Vector3.up * 0.025f;
                     heightViewers[index].outerRadius = target.tileSize;
-                    float height = target.placedTiles[i].height;
+                    float height = target.placedTiles[i].tile.height;
                     heightViewers[index].textMesh.text = height.ToString();
                     if (!heightMaterials.ContainsKey(height))
                     {
@@ -267,7 +339,8 @@ namespace HexKit3D.Editor
     {
         None = 0,
         Placing = 1,
-        Deleting = 2
+        Deleting = 2,
+        Fill = 3
     }
     [System.Serializable]
     public enum HexPlacerReplaceMode

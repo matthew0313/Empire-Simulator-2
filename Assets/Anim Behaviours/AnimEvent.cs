@@ -18,7 +18,6 @@ public class AnimEvent : StateMachineBehaviour
     {
         if (channel == null) channel = animator.GetComponent<AnimEventChannel>();
         invoked = false;
-        Debug.Log(channel);
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks

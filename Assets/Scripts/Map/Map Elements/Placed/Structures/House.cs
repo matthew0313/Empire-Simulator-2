@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class House : Structure, IResidental
 {
-
+    public override StructureCategory category => base.category | StructureCategory.Residental;
+    
     [Header("House")]
     [SerializeField] int m_maxResidents;
     [SerializeField] float m_energyGiven;

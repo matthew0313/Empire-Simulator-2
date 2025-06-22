@@ -5,14 +5,14 @@ using UnityEngine;
 public abstract class PlacedMapElement : MapElement
 {
     [Header("Placed map element")]
-    public GameObject prefabOrigin;
+    [SerializeField] string m_id;
+    public string id => m_id;
 }
 [System.Serializable]
 public class PlacedMapElementSave
 {
     public string id;
-    public int prefabID;
-    public Cubic position;
+    public Vector3 position;
     public Quaternion rotation;
     public DataUnit data;
 }

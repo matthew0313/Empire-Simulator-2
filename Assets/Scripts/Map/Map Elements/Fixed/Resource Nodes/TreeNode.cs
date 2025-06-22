@@ -9,13 +9,12 @@ public class TreeNode : FixedMapElement
     [SerializeField] Animator anim;
     [SerializeField] float maxHp = 100.0f;
     [SerializeField] float respawnTime = 20.0f;
-    [SerializeField] ParticleSystem chopParticle;
     [field: SerializeField] public float requiredTier { get; private set; } = 0;
     public Lumberjack queuedLumberjack;
+
+    [SerializeField] ParticleSystem chopParticle;
     public bool available { get; private set; } = true;
     float hp, counter = 0.0f;
-
-    public override bool canPass => false;
     private void Awake()
     {
         hp = maxHp;

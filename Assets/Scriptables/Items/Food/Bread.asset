@@ -18,6 +18,7 @@ MonoBehaviour:
   m_itemDesc:
     en: It's a bread.
     kr: "\uBE75\uC785\uB2C8\uB2E4."
-  m_itemIcon: {fileID: 21300000, guid: 7154b1afe9bbc5b42ae08e1c9a241839, type: 3}
+  m_category: 2
+  m_itemIcon: {fileID: 21300000, guid: 5714414be129e984ebbc285cc9ab0c3f, type: 3}
   energyRestored: 100
   selectionPriority: 0

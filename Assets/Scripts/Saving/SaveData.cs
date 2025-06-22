@@ -9,4 +9,6 @@ public class SaveData
     public SerializableDictionary<ItemData, DataUnit> itemSettings = new();
 
     public SerializableDictionary<string, IslandSave> islandSaves = new();
+
+    public List<string> unlockedBlueprints = new();
 }

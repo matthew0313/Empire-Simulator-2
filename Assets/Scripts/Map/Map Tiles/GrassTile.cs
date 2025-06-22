@@ -7,9 +7,6 @@ using UnityEditor;
 
 public class GrassTile : MapTile
 {
-    [Header("GrassTile")]
-    [SerializeField] MeshRenderer rend;
-    [SerializeField] Material spring, summer, fall, winter;
     private void OnEnable()
     {
         GameManager.Instance.onDayChange += OnDayChange;
@@ -21,26 +18,13 @@ public class GrassTile : MapTile
     }
     void OnDayChange()
     {
-        switch (GameManager.Instance.currentSeason)
-        {
-            case Season.Spring: rend.material = spring; break;
-            case Season.Summer: rend.material = summer; break;
-            case Season.Fall: rend.material = fall; break;
-            case Season.Winter: rend.material = winter; break;
-        }
+
     }
 }
 #if UNITY_EDITOR
 [CustomEditor(typeof(GrassTile))]
-public class GrassTile_Editor : Editor
+public class GrassTile_Editor : MapTile_Editor
 {
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-        if(GUILayout.Button("Fix placedElement position"))
-        {
-            (target as MapTile).placedElement.transform.position = (target as MapTile).transform.position;
-        }
-    }
+
 }
 #endif

@@ -69,43 +69,58 @@ public class Farmer : NPC
             {
                 public Farmer_Working(Farmer origin, Layer<Farmer> parent) : base(origin, parent)
                 {
-
+                    defaultState = new Farming(origin, this);
+                    AddState("Farming", defaultState);
                 }
-                readonly int isCrouchingID = Animator.StringToHash("IsCrouching");
-                readonly int farmID = Animator.StringToHash("Farm");
-                float counter = 0.0f;
                 public override void OnStateEnter()
                 {
                     base.OnStateEnter();
-                    origin.anim.SetBool(isCrouchingID, true);
-                    counter = 0.0f;
+                    origin.UnSheathe();
                 }
-                public override void OnStateUpdate()
-                {
-                    base.OnStateUpdate();
-                    counter += Time.deltaTime;
-                    if(counter >= origin.farmRate)
-                    {
-                        Farm();
-                        counter = 0.0f;
-                    }
-                }
-                CoroutineHandle farming;
                 public override void OnStateExit()
                 {
                     base.OnStateExit();
-                    origin.anim.SetBool(isCrouchingID, false);
-                    Timing.KillCoroutines(farming);
+                    origin.Sheathe();
                 }
-                void Farm()
+                class Farming : State<Farmer>
                 {
-                    origin.anim.SetTrigger(farmID);
-                    farming = Timing.RunCoroutine(CoroutineUtility.WaitThen(origin.farmTime, () =>
+                    public Farming(Farmer origin, Layer<Farmer> parent) : base(origin, parent) { }
+                    readonly int isCrouchingID = Animator.StringToHash("IsCrouching");
+                    readonly int farmID = Animator.StringToHash("Farm");
+                    float counter = 0.0f;
+                    public override void OnStateEnter()
                     {
-                        (origin.workplace as Farm).AddGrowth((origin.equipment as Sickle).data.growth * origin.growthMultiplier);
-                        origin.EquipmentDamage(origin.durabilityPerFarm);
-                        origin.LoseEnergy(origin.energyPerFarm);
-                    }));
+                        base.OnStateEnter();
+                        origin.anim.SetBool(isCrouchingID, true);
+                        counter = 0.0f;
+                    }
+                    public override void OnStateUpdate()
+                    {
+                        base.OnStateUpdate();
+                        counter += Time.deltaTime;
+                        if (counter >= origin.farmRate)
+                        {
+                            Farm();
+                            counter = 0.0f;
+                        }
+                    }
+                    CoroutineHandle farming;
+                    public override void OnStateExit()
+                    {
+                        base.OnStateExit();
+                        origin.anim.SetBool(isCrouchingID, false);
+                        Timing.KillCoroutines(farming);
+                    }
+                    void Farm()
+                    {
+                        origin.anim.SetTrigger(farmID);
+                        farming = Timing.RunCoroutine(CoroutineUtility.WaitThen(origin.farmTime, () =>
+                        {
+                            (origin.workplace as Farm).AddGrowth((origin.equipment as Sickle).data.growth * origin.growthMultiplier);
+                            origin.EquipmentDamage(origin.durabilityPerFarm);
+                            origin.LoseEnergy(origin.energyPerFarm);
+                        }));
+                    }
                 }
             }
         }

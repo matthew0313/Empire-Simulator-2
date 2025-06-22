@@ -1,28 +1,35 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+using UnityEngine.WSA;
 
 namespace HexKit3D
 {
     public class HexTilemap : MonoBehaviour
     {
         [Header("Grid")]
-        [SerializeField] List<HexTile> m_placedTiles = new();
-        public List<HexTile> placedTiles => m_placedTiles;
+        [SerializeField] List<CubicTilePair> m_placedTiles = new();
+        public List<CubicTilePair> placedTiles => m_placedTiles;
 
         [Header("Settings")]
         [SerializeField] HexTilemapSettings settings;
         public float tileSize => settings.tileSize;
         public float maxHeightDifference => settings.maxHeightDifference;
 
-        public readonly List<(Cubic, HexTile)> tiles = new();
-        private void Awake()
+
+        public void AddTile(HexTile tile, Cubic cubic)
         {
-            foreach (var i in placedTiles)
+            placedTiles.Add(new() { cubic = cubic, tile = tile });
+            placedTiles.Sort((a, b) => Cubic.Compare(a.cubic, b.cubic));
+        }
+        public void RemoveTile(Cubic cubic)
+        {
+            int tmp = placedTiles.LowerBound((a, b) => Cubic.Compare(a.cubic, b.cubic), new() { cubic = cubic });
+            if (tmp != -1)
             {
-                tiles.Add((i.position, i));
+                placedTiles.RemoveAt(tmp);
             }
-            tiles.Sort((a, b) => Cubic.Compare(a.Item1, b.Item1));
         }
         private void OnDrawGizmos()
         {
@@ -31,14 +38,18 @@ namespace HexKit3D
         readonly List<HexTile> searchQueue = new(), searched = new();
         public bool TryGetTile<T>(Cubic cubic, out T tile) where T : HexTile
         {
-            int tmp = tiles.LowerBound((a, b) => Cubic.Compare(a.Item1, b.Item1), (cubic, null));
-            if(tmp != -1 && tiles[tmp].Item2 is T)
+            int tmp = placedTiles.LowerBound((a, b) => Cubic.Compare(a.cubic, b.cubic), new() { cubic = cubic });
+            if(tmp != -1 && placedTiles[tmp].tile is T)
             {
-                tile = tiles[tmp].Item2 as T;
+                tile = placedTiles[tmp].tile as T;
                 return true;
             }
             tile = null;
             return false;
+        }
+        private void Update()
+        {
+            TryGetTile<HexTile>(new Cubic(1000, 1000, 1000), out _);
         }
         public HexTilemapPath<T> FindPath<T>(Cubic startPosition, Cubic endPosition) where T : HexTile
         {
@@ -160,6 +171,12 @@ namespace HexKit3D
             return -1;
         }
     }
+    [System.Serializable]
+    public struct CubicTilePair
+    {
+        public Cubic cubic;
+        public HexTile tile;
+    }
 }
 #if UNITY_EDITOR
 namespace HexKit3D.Editor
@@ -175,8 +192,12 @@ namespace HexKit3D.Editor
             {
                 foreach (var i in ((HexTilemap)target).placedTiles)
                 {
-                    i.transform.position = Cubic.CubicToPos(i.position, i.transform.position.y, ((HexTilemap)target).tileSize);
+                    i.tile.transform.position = Cubic.CubicToPos(i.cubic, i.tile.transform.position.y, ((HexTilemap)target).tileSize);
                 }
+            }
+            if(GUILayout.Button("Clear null tiles"))
+            {
+                ((HexTilemap)target).placedTiles.RemoveAll(item => item.tile == null);
             }
         }
     }

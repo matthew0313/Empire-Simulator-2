@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cd3ac2989431a745a3e3a223f2f0b3f, type: 3}
+  m_Name: Wheat Farm
+  m_EditorClassIdentifier: 
+  elements:
+  - item: {fileID: 11400000, guid: 0f90ea034e3bd27449c9ee8126ed67bd, type: 2}
+    chance: 350

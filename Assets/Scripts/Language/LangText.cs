@@ -16,4 +16,12 @@ public struct LangText
             }
         }
     }
+    public static LangText operator +(LangText a, LangText b)
+    {
+        return new()
+        {
+            en = a.en + b.en,
+            kr = a.kr + b.kr
+        };
+    }
 }

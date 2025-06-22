@@ -8,18 +8,11 @@ using UnityEditor;
 public class MapTile : HexTile
 {
     public Island island { get; private set; }
-    public MapElement placedElement;
-    public override bool isWalkable => placedElement == null || placedElement.canPass;
-    public void Set(Island island)
+    public override bool isWalkable
     {
-        this.island = island;
-        if (placedElement != null) placedElement.SetTile(this);
-    }
-    public override IEnumerable<HexTile> GetNeighbors()
-    {
-        foreach(var i in base.GetNeighbors())
+        get
         {
-            if (i is MapTile tile) yield return i;
+            return !Physics.Raycast(transform.position, Vector3.up, 1000.0f, GameManager.Instance.obstructionLayer);
         }
     }
 }
@@ -30,10 +23,7 @@ public class MapTile_Editor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        if(GUILayout.Button("Fix placedElement position"))
-        {
-            (target as MapTile).placedElement.transform.position = (target as MapTile).transform.position;
-        }
+        if (GUILayout.Button("Check Walkability")) Debug.Log((target as MapTile).isWalkable);
     }
 }
 #endif

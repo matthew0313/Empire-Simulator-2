@@ -6,7 +6,7 @@ namespace HexKit3D
     public class HexTile : MonoBehaviour
     {
         public HexTilemap owner;
-        public Cubic position;
+        [HideInInspector] public Cubic position;
         public float height => transform.localPosition.y;
 
         //Pathfinding

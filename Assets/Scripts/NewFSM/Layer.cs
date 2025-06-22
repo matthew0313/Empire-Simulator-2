@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 
 public abstract class Layer<T> : State<T>
@@ -34,12 +35,13 @@ public abstract class Layer<T> : State<T>
             Debug.Log("Tried to access state that does not exist");
             return;
         }
-        currentState.OnStateExit();
+        if(currentState != null) currentState.OnStateExit();
         currentState = states[stateName];
         currentState.OnStateEnter();
     }
     public override void OnStateEnter()
     {
+        if (currentState != null) currentState.OnStateExit();
         currentState = defaultState;
         currentState.OnStateEnter();
     }

@@ -19,16 +19,6 @@ public class Island : MonoBehaviour, ISavable
     [SerializeField] List<FixedMapElement> fixedMapElements = new();
     [SerializeField] List<PlacedMapElement> placedMapElements = new();
     public Action onMapElementChange;
-    private void Awake()
-    {
-        foreach(var i in tilemap.tiles)
-        {
-            if (i.Item2 is MapTile mapTile)
-            {
-                mapTile.Set(this);
-            }
-        }
-    }
     public IEnumerable<MapElement> MapElements()
     {
         foreach (var i in fixedMapElements) yield return i;
@@ -47,6 +37,7 @@ public class Island : MonoBehaviour, ISavable
     public void PlaceElement(PlacedMapElement element)
     {
         placedMapElements.Add(element);
+        element.placedIsland = this;
         onMapElementChange?.Invoke();
     }
     public void RemoveElement(PlacedMapElement element)
@@ -66,9 +57,8 @@ public class Island : MonoBehaviour, ISavable
         {
             save.placedMapElements.Add(new()
             {
-                id = i.id.value,
-                prefabID = GameManager.Instance.placedMapElementDB.PrefabToIndex(i.prefabOrigin),
-                position = i.placedTile.position,
+                id = i.id,
+                position = i.transform.position,
                 rotation = i.transform.rotation,
                 data = i.Save()
             });
@@ -88,13 +78,9 @@ public class Island : MonoBehaviour, ISavable
         foreach (var i in placedMapElements) Destroy(i.gameObject); placedMapElements.Clear();
         foreach(var i in save.placedMapElements)
         {
-            if(tilemap.TryGetTile(i.position, out MapTile tile))
-            {
-                PlacedMapElement tmp = Instantiate(GameManager.Instance.placedMapElementDB.IndexToPrefab(i.prefabID), tile.transform.position, i.rotation).GetComponent<PlacedMapElement>();
-                tmp.id.value = i.id;
-                placedMapElements.Add(tmp);
-                tmp.Load(i.data);
-            }
+            PlacedMapElement tmp = Instantiate(GameManager.Instance.GetPlacedMapElementPrefab(i.id), i.position, i.rotation);
+            placedMapElements.Add(tmp);
+            tmp.Load(i.data);
         }
     }
 }

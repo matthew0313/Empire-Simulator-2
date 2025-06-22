@@ -10,13 +10,12 @@ public class OreNode : FixedMapElement
     [SerializeField] Animator anim;
     [SerializeField] float maxHp = 100.0f;
     [SerializeField] float respawnTime = 20.0f;
-    [SerializeField] ParticleSystem mineParticle;
     [field: SerializeField] public float requiredTier { get; private set; } = 0;
     public Miner queuedMiner;
+
+    [SerializeField] ParticleSystem mineParticle, breakParticle;
     public bool available { get; private set; } = true;
     float hp, counter = 0.0f;
-
-    public override bool canPass => false;
     private void Awake()
     {
         hp = maxHp;
@@ -39,7 +38,6 @@ public class OreNode : FixedMapElement
     public void GetDamage(float damage)
     {
         hp -= damage;
-        mineParticle.Play();
         if(hp <= 0.0f)
         {
             hp = 0.0f;
@@ -48,6 +46,8 @@ public class OreNode : FixedMapElement
             anim.SetTrigger(breakID);
             queuedMiner = null;
             foreach (var i in loot.GetLoot()) EmpireManager.Instance.AddItem(i.item, i.count);
+            breakParticle.Play();
         }
+        else mineParticle.Play();
     }
 }

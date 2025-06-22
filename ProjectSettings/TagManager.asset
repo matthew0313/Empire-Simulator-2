@@ -3,18 +3,19 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Indicator
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - Tile
   - Water
   - UI
-  - Obstacle
   - 
   - 
-  - 
+  - Obstruction
+  - MapElement
   - 
   - 
   - 

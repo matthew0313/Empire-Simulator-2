@@ -55,9 +55,9 @@ public class Lumberjack : NPC
     protected override List<IWorkplace> GetAvailableJobs()
     {
         availableJobsList.Clear();
-        foreach(var i in assignedIsland.SearchElements(element => element is LumberjackHut))
+        foreach(var i in assignedIsland.SearchElements(element => element is LumberjackStation))
         {
-            if((i as LumberjackHut).levelRequirement <= level) availableJobsList.Add(i as IWorkplace);
+            if((i as LumberjackStation).levelRequirement <= level) availableJobsList.Add(i as IWorkplace);
         }
         return availableJobsList;
     }
@@ -137,7 +137,7 @@ public class Lumberjack : NPC
                     }
                     void Search()
                     {
-                        var list = (origin.workplace as LumberjackHut).SearchTrees();
+                        var list = (origin.workplace as LumberjackStation).SearchTrees();
                         list.RemoveAll(node => !node.available || node.requiredTier > (origin.equipment as Axe).data.tier || node.queuedLumberjack != null);
                         if(list.Count > 0)
                         {
