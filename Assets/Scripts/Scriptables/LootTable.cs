@@ -6,6 +6,7 @@ using UnityEngine;
 public class LootTable : ScriptableObject
 {
     [SerializeField] LootTableElement[] elements;
+    public ItemData primaryLoot => elements[0].item;
     public IEnumerable<ItemIntPair> GetLoot(float luckMultiplier = 1.0f)
     {
         foreach(var i in elements)

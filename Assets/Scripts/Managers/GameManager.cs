@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UIElements;
+using static UnityEngine.UI.Image;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -66,16 +68,14 @@ public class GameManager : MonoBehaviour, ISavable
     public readonly List<Blueprint> unlockedBlueprints = new();
 
 
-    [Header("Debug")]
+    /*[Header("Debug")]
     [SerializeField] string buildMode_FSMPath;
-    BuildMode_TopLayer buildMode_TopLayer;
+    BuildMode_TopLayer buildMode_TopLayer;*/
+
+    TaskMachine<GameManager> taskMachine;
     void Awake()
     {
-        buildMode_TopLayer = new(this);
-#if UNITY_EDITOR
-        buildMode_TopLayer.onFSMChange += () => { buildMode_FSMPath = buildMode_TopLayer.GetFSMPath(); };
-#endif
-        buildMode_TopLayer.OnStateEnter();
+        taskMachine = new(this);
     }
     private void Start()
     {
@@ -87,7 +87,8 @@ public class GameManager : MonoBehaviour, ISavable
     private void Update()
     {
         UpdateTime();
-        buildMode_TopLayer.OnStateUpdate();
+        if (Input.GetKeyDown(KeyCode.Escape)) taskMachine.EndTask();
+        taskMachine.Update();
     }
     void UpdateTime()
     {
@@ -121,15 +122,14 @@ public class GameManager : MonoBehaviour, ISavable
         return null;
     }
 
-    public BuildMode_Mode buildMode = BuildMode_Mode.None;
-    Blueprint placingBlueprint = null;
     public void EnterBuildMode(Blueprint blueprint)
     {
-        placingBlueprint = blueprint;
-        buildMode = BuildMode_Mode.Place;
+        taskMachine.StartTask(new Task_PlaceBlueprint(blueprint));
     }
-    public void EnterDestroyMode() => buildMode = BuildMode_Mode.Destroy;
-    public void ExitBuildMode() => buildMode = BuildMode_Mode.None;
+    public void EnterDestroyMode()
+    {
+        taskMachine.StartTask(new Task_Destroy());
+    }
     public void Save(SaveData data)
     {
         foreach(var i in unlockedBlueprints)
@@ -146,7 +146,154 @@ public class GameManager : MonoBehaviour, ISavable
             if (GetPlacedMapElementPrefab(i) is Blueprint blueprint) UnlockBlueprint(blueprint);
         }
     }
-    class BuildMode_TopLayer : TopLayer<GameManager>
+    float placeRotation = 0.0f;
+    class Task_BuildMode : Task<GameManager>
+    {
+        public override void OnTaskStart(GameManager origin, TaskMachine<GameManager> machine)
+        {
+            base.OnTaskStart(origin, machine);
+            UIManager.Instance.defaultUI.Hide();
+            UIManager.Instance.buildUI.Show();
+        }
+        public override void OnTaskEnd()
+        {
+            base.OnTaskEnd();
+            UIManager.Instance.defaultUI.Show();
+            UIManager.Instance.buildUI.Hide();
+        }
+    }
+    class Task_PlaceBlueprint : Task_BuildMode
+    {
+        readonly Blueprint blueprint;
+        public Task_PlaceBlueprint(Blueprint blueprint)
+        {
+            this.blueprint = blueprint;
+        }
+        Blueprint placing;
+        bool positioned = false;
+        public override void OnTaskStart(GameManager origin, TaskMachine<GameManager> machine)
+        {
+            base.OnTaskStart(origin, machine);
+            placing = Instantiate(blueprint);
+            placing.EnterPlaceMode();
+            placing.transform.rotation = Quaternion.Euler(0, origin.placeRotation, 0);
+            EmpireManager.Instance.onInventoryUpdate += OnInventoryUpdate;
+            positioned = false;
+            UIManager.Instance.buildUI.placeUI.Show();
+            CheckIngredients();
+        }
+        public override void OnTaskUpdate()
+        {
+            base.OnTaskUpdate();
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                machine.EndTask(); return;
+            }
+
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 1000.0f, LayerMask.GetMask("Tile")))
+            {
+                if (hit.transform.TryGetComponent(out MapTile tile))
+                {
+                    placing.transform.position = tile.transform.position;
+                    positioned = true;
+                }
+            }
+
+            placing.cannotPlace = false;
+            if (!enoughIngredients)
+            {
+                placing.cannotPlace = true;
+            }
+            if (placing.isObstructed)
+            {
+
+            }
+
+            if (positioned && Input.GetMouseButtonDown(0)) Place();
+            if (Input.GetKeyDown(KeyCode.R)) Rotate();
+        }
+        void OnInventoryUpdate(ItemData item)
+        {
+            foreach (var i in placing.ingredients)
+            {
+                if (i.item == item) CheckIngredients();
+            }
+        }
+        bool enoughIngredients = false;
+        void CheckIngredients()
+        {
+            foreach (var i in placing.ingredients)
+            {
+                if (EmpireManager.Instance.GetItemCount(i.item) < i.count)
+                {
+                    enoughIngredients = false; return;
+                }
+            }
+            enoughIngredients = true;
+        }
+        void Place()
+        {
+            if (!placing.canPlace) return;
+            placing.ExitPlaceMode();
+            origin.currentIsland.PlaceElement(placing);
+            foreach (var i in placing.ingredients)
+            {
+                EmpireManager.Instance.RemoveItem(i.item, i.count);
+            }
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                placing = Instantiate(blueprint);
+                placing.EnterPlaceMode();
+            }
+            else
+            {
+                placing = null;
+                Exit();
+            }
+        }
+        void Rotate()
+        {
+            origin.placeRotation += 60.0f;
+            placing.transform.rotation = Quaternion.Euler(0, origin.placeRotation, 0);
+        }
+        void Exit()
+        {
+            machine.EndTask();
+        }
+        public override void OnTaskEnd()
+        {
+            base.OnTaskEnd();
+            EmpireManager.Instance.onInventoryUpdate -= OnInventoryUpdate;
+            if (placing != null) Destroy(placing.gameObject);
+            UIManager.Instance.buildUI.placeUI.Hide();
+        }
+    }
+    class Task_Destroy : Task_BuildMode
+    {
+        public override void OnTaskStart(GameManager origin, TaskMachine<GameManager> machine)
+        {
+            base.OnTaskStart(origin, machine);
+            UIManager.Instance.buildUI.destroyUI.Show();
+        }
+        public override void OnTaskUpdate()
+        {
+            base.OnTaskUpdate();
+            if (Input.GetMouseButtonDown(0) && Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 1000.0f, LayerMask.GetMask("MapElement")))
+            {
+                if (hit.transform.TryGetComponent(out PlacedMapElement element))
+                {
+                    origin.currentIsland.RemoveElement(element);
+                    Destroy(element.gameObject);
+                }
+            }
+        }
+        public override void OnTaskEnd()
+        {
+            base.OnTaskEnd();
+            UIManager.Instance.buildUI.destroyUI.Hide();
+        }
+    }
+    /*class BuildMode_TopLayer : TopLayer<GameManager>
     {
         public BuildMode_TopLayer(GameManager origin) : base(origin, null)
         {
@@ -339,7 +486,7 @@ public class GameManager : MonoBehaviour, ISavable
                 }
             }
         }
-    }
+    }*/
 }
 [System.Serializable]
 public enum Season
@@ -349,12 +496,12 @@ public enum Season
     Fall = 2,
     Winter = 3
 }
-public enum BuildMode_Mode
+/*public enum BuildMode_Mode
 {
     None = 0,
     Place = 1,
     Destroy = 2
-}
+}*/
 #if UNITY_EDITOR
 [CustomEditor(typeof(GameManager))]
 public class GameManager_Editor : Editor

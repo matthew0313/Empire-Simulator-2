@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,12 +11,9 @@ public class Blueprint : PlacedMapElement, IWorkplace
     public int levelRequirement => structure.buildLevelRequirement;
     public int maxWorkers => structure.buildMaxWorkers;
     public float progressRequired => structure.buildProgressRequired;
-
-    [Header("Progress Bar")]
-    [SerializeField] GameObject progressBar;
-    [SerializeField] Transform progressBarFill;
     public List<NPC> workers { get; } = new();
     public float progress { get; private set; } = 0.0f;
+    public Action onProgressChange;
     public void AddProgress(float amount)
     {
         progress += amount;
@@ -27,7 +25,7 @@ public class Blueprint : PlacedMapElement, IWorkplace
             placedIsland.RemoveElement(this);
             Destroy(gameObject);
         }
-        else progressBarFill.localScale = new Vector2(progress / progressRequired, 1.0f);
+        else onProgressChange?.Invoke();
     }
 
 
@@ -74,12 +72,13 @@ public class Blueprint : PlacedMapElement, IWorkplace
             i.Item1.SetMaterials(i.Item2);
         }
     }
-    public bool isPlacing { get; private set; }
+    public bool isPlacing { get; private set; } = false;
+    public Action onIsPlacingChange;
+
     public bool cannotPlace = false;
     void Awake()
     {
         SearchMeshes();
-        progressBarFill.localScale = new Vector2(progress / progressRequired, 1.0f);
     }
     void SearchMeshes()
     {
@@ -100,12 +99,12 @@ public class Blueprint : PlacedMapElement, IWorkplace
     public void EnterPlaceMode()
     {
         isPlacing = true;
-        progressBar.SetActive(false);
+        onIsPlacingChange?.Invoke();
     }
     public void ExitPlaceMode()
     {
         isPlacing = false;
-        progressBar.SetActive(true);
+        onIsPlacingChange?.Invoke();
     }
     private void Update()
     {

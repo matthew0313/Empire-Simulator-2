@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using UnityEngine.Rendering;
 using UnityEngine.InputSystem.Android;
 using Unity.VisualScripting;
+using UnityEditor.Rendering;
 
 public abstract class NPC : Entity
 {
@@ -86,7 +87,7 @@ public abstract class NPC : Entity
     }
     float moveSpeed => GameManager.Instance.baseNPCMoveSpeed * moveSpeedMultiplier;
     float stopDistance => GameManager.Instance.npcNavigationStopDistance;
-    (CoroutineHandle, Action) navigating;
+    CoroutineHandle navigating;
 
     //energy & work
     public float energy = 10.0f;
@@ -122,34 +123,36 @@ public abstract class NPC : Entity
         }
     }
     HexTilemapPath<MapTile> navigatingPath = null;
-    public void Navigate(HexTilemapPath<MapTile> path, Action onFinish = null)
+    public void Navigate(HexTilemapPath<MapTile> path, int stopTileDistance = 0)
     {
         if (isNavigating) StopNavigating();
-        if(path == null)
-        {
-            onFinish?.Invoke(); return;
-        }
         isNavigating = true;
         navigatingPath = path;
-        navigating = (Timing.RunCoroutine(Navigating(path, onFinish)), onFinish);
+        navigating = Timing.RunCoroutine(Navigating(path, stopTileDistance));
     }
     public void StopNavigating()
     {
         if (!isNavigating) return;
-        Timing.KillCoroutines(navigating.Item1);
+        Timing.KillCoroutines(navigating);
         navigatingPath = null;
         isNavigating = false;
-        navigating.Item2?.Invoke();
     }
     public void LookAt(Vector3 targetPos)
     {
         targetRotation = Mathf.Atan2(targetPos.x - currentPos.x, targetPos.z - currentPos.z) * Mathf.Rad2Deg;
     }
     Vector3 currentPos => new Vector3(transform.position.x, 0.0f, transform.position.z);
-    IEnumerator<float> Navigating(HexTilemapPath<MapTile> path, Action onFinish)
+    IEnumerator<float> Navigating(HexTilemapPath<MapTile> path, int stopTileDistance)
     {
-        foreach(var next in path.route)
+        MapTile destination = path.route[path.route.Count - 1];
+        foreach (var next in path.route)
         {
+            if (Cubic.Distance(position, destination.position) <= stopTileDistance)
+            {
+                LookAt(new Vector3(destination.transform.position.x, 0.0f, destination.transform.position.z));
+                StopNavigating();
+                yield break;
+            }
             Vector3 targetPos = new Vector3(next.transform.position.x, 0.0f, next.transform.position.z);
             LookAt(targetPos);
             while (Vector3.Distance(currentPos, targetPos) > stopDistance)
@@ -238,12 +241,12 @@ public abstract class NPC : Entity
         protected class NPC_Navigate<T> : State<T> where T : NPC
         {
             readonly Func<Cubic> destinationGetter;
+            readonly Func<int> stopTileDistanceGetter;
             readonly Action onArrival;
-            readonly Func<int> toleranceGetter;
-            public NPC_Navigate(T origin, Layer<T> parent, Func<Cubic> destinationGetter, Func<int> toleranceGetter, Action onArrival) : base(origin, parent)
+            public NPC_Navigate(T origin, Layer<T> parent, Func<Cubic> destinationGetter, Func<int> stopTileDistanceGetter, Action onArrival) : base(origin, parent)
             {
                 this.destinationGetter = destinationGetter;
-                this.toleranceGetter = toleranceGetter;
+                this.stopTileDistanceGetter = stopTileDistanceGetter;
                 this.onArrival = onArrival;
             }
             const float pathSearchRate = 5.0f;
@@ -251,7 +254,7 @@ public abstract class NPC : Entity
             public override void OnStateEnter()
             {
                 base.OnStateEnter();
-                origin.Navigate(origin.assignedIsland.tilemap.FindPath<MapTile>(origin.position, destinationGetter.Invoke()));
+                origin.Navigate(origin.assignedIsland.tilemap.FindPath<MapTile>(origin.position, destinationGetter.Invoke()), stopTileDistanceGetter.Invoke());
                 counter = 0.0f;
             }
             public override void OnStateUpdate()
@@ -259,7 +262,7 @@ public abstract class NPC : Entity
                 base.OnStateUpdate();
                 if (!origin.isNavigating)
                 {
-                    if (Cubic.Distance(origin.position, destinationGetter.Invoke()) <= toleranceGetter.Invoke())
+                    if (Cubic.Distance(origin.position, destinationGetter.Invoke()) <= stopTileDistanceGetter.Invoke())
                     {
                         origin.StopNavigating(); onArrival?.Invoke(); return;
                     }
@@ -332,13 +335,13 @@ public abstract class NPC : Entity
         }
         protected abstract class NPC_WorkLayer<T> : Layer<T> where T : NPC
         {
-            protected NPC_WorkLayer(T origin, Layer<T> parent) : base(origin, parent)
+            protected NPC_WorkLayer(T origin, Layer<T> parent, int stopDistance = 0) : base(origin, parent)
             {
                 defaultState = new LookForWork<T>(origin, this);
                 AddState("LookForWork", defaultState);
                 AddState("GoToWork", new NPC_Navigate<T>(origin, this,
                     () => origin.workplace.self.position,
-                    () => origin.assignedIsland.tilemap.TryGetTile<MapTile>(origin.workplace.self.position, out MapTile tile) && tile.isWalkable ? 0 : 1,
+                    () => stopDistance,
                     () => ChangeState("Working")));
                 AddState("Working", GetState_Working());
             }
@@ -405,11 +408,82 @@ public abstract class NPC : Entity
                     }
                 }
             }
-            class LookForWork<T> : State<T> where T : NPC
+            class LookForWork<T> : Layer<T> where T : NPC
             {
                 public LookForWork(T origin, Layer<T> parent) : base(origin, parent)
                 {
+                    defaultState = new Searching<T>(origin, this);
+                    AddState("Searching", defaultState);
+                    AddState("Wandering", new Wandering<T>(origin, this));
+                }
+                class Searching<T> : State<T> where T : NPC
+                {
+                    public Searching(T origin, Layer<T> parent) : base(origin, parent)
+                    {
 
+                    }
+                    const float waitTime = 20.0f;
+                    float counter = 0.0f;
+                    public override void OnStateEnter()
+                    {
+                        base.OnStateEnter();
+                        counter = 0.0f;
+                    }
+                    public override void OnStateUpdate()
+                    {
+                        base.OnStateUpdate();
+                        counter += Time.deltaTime;
+                        if(counter >= waitTime)
+                        {
+                            parentLayer.ChangeState("Wandering"); return;
+                        }
+                    }
+                }
+                class Wandering<T> : State<T> where T : NPC
+                {
+                    public Wandering(T origin, Layer<T> parent) : base(origin, parent)
+                    {
+
+                    }
+                    const float wanderRate = 10.0f;
+                    const int wanderRange = 2;
+                    float counter = 0.0f;
+                    public override void OnStateEnter()
+                    {
+                        base.OnStateEnter();
+                        counter = 0.0f;
+                        Wander();
+                    }
+                    public override void OnStateUpdate()
+                    {
+                        base.OnStateUpdate();
+                        counter += Time.deltaTime;
+                        if(counter >= wanderRate)
+                        {
+                            counter = 0.0f;
+                            Wander();
+                        }
+                    }
+                    readonly List<Cubic> randomList = new();
+                    void Wander()
+                    {
+                        randomList.Clear();
+                        Cubic pos = origin.home.self.position;
+                        for(int q = -wanderRange; q <= wanderRange; q++)
+                        {
+                            for(int r = Mathf.Max(-wanderRange, -q-wanderRange); r <= Mathf.Min(wanderRange, -q+wanderRange); r++)
+                            {
+                                randomList.Add(pos + new Cubic(q, r, -q - r));
+                            }
+                        }
+                        origin.Navigate(origin.assignedIsland.tilemap.FindPath<MapTile>(origin.position, randomList[UnityEngine.Random.Range(0, randomList.Count)]));
+                    }
+
+                    public override void OnStateExit()
+                    {
+                        base.OnStateExit();
+                        if (origin.isNavigating) origin.StopNavigating();
+                    }
                 }
                 const float searchRate = 1.0f;
                 float counter = 0.0f;
@@ -468,7 +542,7 @@ public abstract class NPC : Entity
             {
                 defaultState = new NPC_Navigate<T>(origin, this,
                     () => origin.home.self.position,
-                    () => origin.assignedIsland.tilemap.TryGetTile(origin.home.self.position, out MapTile tile) && tile.isWalkable ? 0 : 1,
+                    () => 0,
                     () => ChangeState("Resting"));
                 AddState("GoHome", defaultState);
                 AddState("Resting", new Resting(origin, this));
