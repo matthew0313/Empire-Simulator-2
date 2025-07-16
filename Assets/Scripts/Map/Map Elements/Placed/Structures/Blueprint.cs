@@ -28,8 +28,6 @@ public class Blueprint : PlacedMapElement, IWorkplace
         else onProgressChange?.Invoke();
     }
 
-
-    readonly List<(MeshRenderer, List<Material>)> meshes = new();
     readonly List<Collider> obstructions = new();
     public bool canPlace => !isObstructed && !cannotPlace;
     public bool isObstructed => obstructions.Count > 0;
@@ -53,41 +51,10 @@ public class Blueprint : PlacedMapElement, IWorkplace
             }
         }
     }
-    void SetMaterial(Material material)
-    {
-        foreach (var i in meshes)
-        {
-            List<Material> tmp = new();
-            for(int k = 0; k < i.Item1.materials.Length; k++)
-            {
-                tmp.Add(material);
-            }
-            i.Item1.SetMaterials(tmp);
-        }
-    }
-    void RevertMaterial()
-    {
-        foreach (var i in meshes)
-        {
-            i.Item1.SetMaterials(i.Item2);
-        }
-    }
     public bool isPlacing { get; private set; } = false;
     public Action onIsPlacingChange;
 
     public bool cannotPlace = false;
-    void Awake()
-    {
-        SearchMeshes();
-    }
-    void SearchMeshes()
-    {
-        foreach (var i in GetComponentsInChildren<MeshRenderer>())
-        {
-            if (i.gameObject.CompareTag("Indicator")) continue;
-            meshes.Add((i, new List<Material>(i.materials)));
-        }
-    }
     private void OnTriggerEnter(Collider other)
     {
         if (!obstructions.Contains(other)) obstructions.Add(other);

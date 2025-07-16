@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -7,6 +8,11 @@ using UnityEngine.UI;
 
 public class BuildTab : Tab
 {
+    [Header("Tween")]
+    [SerializeField] RectTransform tweenTarget;
+    [SerializeField] float tweenTime = 0.5f;
+    [SerializeField] Ease tweenEase = Ease.OutCirc;
+
     [Header("Elements")]
     [SerializeField] BuildTabElement elementPrefab;
     [SerializeField] Transform elementAnchor;
@@ -20,15 +26,28 @@ public class BuildTab : Tab
     [SerializeField] Button buildButton;
     readonly List<BuildTabIngredientElement> ingredientElements = new();
     bool initialized = false;
+    Tween tween;
+    float tweenCounter = 0.0f;
     public override void Open()
     {
         base.Open();
         gameObject.SetActive(true);
+        if (tween == null) tween = DOTween.To(() => tweenCounter, value => tweenCounter = value, 1.0f, tweenTime)
+                .SetAutoKill(false)
+                .SetEase(tweenEase)
+                .OnUpdate(() =>
+                {
+                    tweenTarget.anchorMin = new Vector2(0.0f, 1.0f - tweenCounter);
+                    tweenTarget.anchorMax = new Vector2(1.0f, 2.0f - tweenCounter);
+                });
+        tween.OnStepComplete(null);
+        tween.PlayForward();
     }
     public override void Close()
     {
         base.Close();
-        gameObject.SetActive(false);
+        tween.OnStepComplete(() => gameObject.SetActive(false));
+        tween.PlayBackwards();
     }
     void Init()
     {

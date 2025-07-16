@@ -60,8 +60,10 @@ public class GameManager : MonoBehaviour, ISavable
     [Header("BuildMode")]
     [SerializeField] Material m_canPlaceMaterial;
     [SerializeField] Material m_cannotPlaceMaterial;
+    [SerializeField] Material m_destroySelectedMaterial;
     public Material canPlaceMaterial => m_canPlaceMaterial;
     public Material cannotPlaceMaterial => m_cannotPlaceMaterial;
+    public Material destroySelectedMaterial => m_destroySelectedMaterial;
 
     [Header("Unlocks")]
     [SerializeField] Blueprint[] startingBlueprints;
@@ -275,22 +277,35 @@ public class GameManager : MonoBehaviour, ISavable
             base.OnTaskStart(origin, machine);
             UIManager.Instance.buildUI.destroyUI.Show();
         }
+        PlacedMapElement highlighted;
         public override void OnTaskUpdate()
         {
             base.OnTaskUpdate();
-            if (Input.GetMouseButtonDown(0) && Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 1000.0f, LayerMask.GetMask("MapElement")))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 1000.0f, LayerMask.GetMask("MapElement")) && hit.transform.TryGetComponent(out PlacedMapElement element))
             {
-                if (hit.transform.TryGetComponent(out PlacedMapElement element))
+                if(highlighted != element)
                 {
-                    origin.currentIsland.RemoveElement(element);
-                    Destroy(element.gameObject);
+                    if (highlighted != null) highlighted.RevertMaterial();
+                    highlighted = element;
+                    highlighted.SetMaterial(origin.destroySelectedMaterial);
                 }
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Destroy(highlighted.gameObject);
+                }
+            }
+            else
+            {
+                if (highlighted != null) highlighted.RevertMaterial();
+                highlighted = null;
             }
         }
         public override void OnTaskEnd()
         {
             base.OnTaskEnd();
             UIManager.Instance.buildUI.destroyUI.Hide();
+            if (highlighted != null) highlighted.RevertMaterial();
+            highlighted = null;
         }
     }
     /*class BuildMode_TopLayer : TopLayer<GameManager>

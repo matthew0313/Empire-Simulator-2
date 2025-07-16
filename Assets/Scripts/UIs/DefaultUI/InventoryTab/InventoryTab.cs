@@ -4,9 +4,15 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class InventoryTab : Tab
 {
+    [Header("Tween")]
+    [SerializeField] RectTransform tweenTarget;
+    [SerializeField] float tweenTime = 0.5f;
+    [SerializeField] Ease tweenEase = Ease.OutCirc;
+
     [Header("Elements")]
     [SerializeField] InventoryTabElement elementPrefab;
     [SerializeField] Transform elementAnchor;
@@ -15,15 +21,29 @@ public class InventoryTab : Tab
     [SerializeField] Image itemImage;
     [SerializeField] TMP_Text itemName, itemCategory, itemDesc;
     readonly Dictionary<ItemData, InventoryTabElement> elements = new();
+
+    Tween tween;
+    float tweenCounter = 0.0f;
     public override void Open()
     {
         base.Open();
         gameObject.SetActive(true);
+        if (tween == null) tween = DOTween.To(() => tweenCounter, value => tweenCounter = value, 1.0f, tweenTime)
+                .SetAutoKill(false)
+                .SetEase(tweenEase)
+                .OnUpdate(() =>
+                {
+                    tweenTarget.anchorMin = new Vector2(0.0f, 1.0f - tweenCounter);
+                    tweenTarget.anchorMax = new Vector2(1.0f, 2.0f - tweenCounter);
+                });
+        tween.OnStepComplete(null);
+        tween.PlayForward();
     }
     public override void Close()
     {
         base.Close();
-        gameObject.SetActive(false);
+        tween.OnStepComplete(() => gameObject.SetActive(false));
+        tween.PlayBackwards();
     }
 
     int currentCategory = 0;
